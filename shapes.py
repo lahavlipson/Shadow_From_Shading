@@ -6,6 +6,11 @@ class Shape:
     def translate(self, offset):
         self.center = self.center + offset
 
+    def rotate(self, pitch, yaw):
+        pass
+
+    def render(self):
+        pass
 
 class Sphere(Shape):
     def __init__(self, center, radius):
