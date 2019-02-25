@@ -1,4 +1,5 @@
-from renderer import Cir
+from renderer import Cir, Tri
+import numpy as np
 
 class Shape:
     def __init__(self, center):
@@ -29,18 +30,42 @@ class Sphere(Shape):
         return [Cir((self.center, self.radius))]
 
 class Cuboid(Shape):
-
-    def __init__(self, center, width, height, depth):
+    def __init__(self, center):
         super().__init__(center)
-        self.side_lengths = np.array(width, height, depth)
+        self.scale_matrix = np.identity(3)
+        self.triangle_faces = [(( 0.5,  0.5,  0.5), (-0.5,  0.5, -0.5), (-0.5,  0.5,  0.5)),
+                               (( 0.5,  0.5,  0.5), (-0.5,  0.5,  0.5), (-0.5, -0.5,  0.5)),
+                               (( 0.5,  0.5,  0.5), ( 0.5, -0.5,  0.5), ( 0.5, -0.5, -0.5)),
+                               (( 0.5,  0.5,  0.5), (-0.5, -0.5,  0.5), ( 0.5, -0.5,  0.5)),
+                               (( 0.5,  0.5,  0.5), ( 0.5, -0.5, -0.5), ( 0.5,  0.5, -0.5)),
+                               (( 0.5,  0.5,  0.5), ( 0.5,  0.5, -0.5), (-0.5,  0.5, -0.5)),
+
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5))]
+        self.triangle_faces = np.array(self.triangle_faces)
+
 
     def scale(self, factor, axis=None):
+        if axis is None:
+            self.scale_matrix = factor * self.scale_matrix
+            return
+
         assert axis >= 0 and axis < 3
-        self.side_lengths[axis] = self.side_lengths[axis] * factor
+        self.scale_matrix[axis] = self.scale_matrix[axis] * factor
 
     def render(self):
-        pass
+        modified = self.triangle_faces.reshape(36, 3)
+        modified = np.dot(modified, self.scale_matrix)
+        modified = modified.reshape(12, 3, 3)
+        return [Tri(tuple(face)) for face in modified]
+
 
 if __name__ == '__main__':
     sp = Sphere((0, 0, 0), 5)
     shapes_so_far = sp.render()
+    cuboid = Cuboid((0, 0, 0), 1, 2, 3)
+    print(cuboid.render())
