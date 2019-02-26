@@ -1,14 +1,18 @@
-from shapes import Sphere, Cuboid
+from shapes import Sphere, Cuboid, Tetrahedron
 from renderer import Renderer, Cam, Lit, Tri
 
 rend = Renderer("./Renderer")
 
 sp = Sphere((0, 75, 0), 25)
 shapes = sp.render()
-cuboid = Cuboid((100, 50, -100))
-cuboid.scale(50)
+cuboid = Cuboid((30, 25, -100))
+cuboid.scale(25)
 cuboid.rotate(45, 90)
 shapes.extend(cuboid.render())
+tetrahedron = Tetrahedron((100, 50, -100))
+tetrahedron.scale(25)
+tetrahedron.rotate(45, 90)
+shapes.extend(tetrahedron.render())
 
 background_prims = []
 background_prims.append(Tri([(-1000.00,-40.00,1000.00), (1000.00,-40.00, 1000.00), (-1000.00,-40.00,-1000.00)]))
