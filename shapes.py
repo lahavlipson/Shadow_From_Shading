@@ -3,7 +3,7 @@ import numpy as np
 
 class Shape:
     def __init__(self, center):
-        self.center = center
+        self.center = np.array(center)
         self.rotation_matrix = np.identity(3)
 
     def translate(self, offset):
