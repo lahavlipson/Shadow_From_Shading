@@ -78,6 +78,39 @@ class Cuboid(Shape):
         modified += offset
         return [Tri(tuple(face)) for face in modified]
 
+class Tetrahedron(Shape):
+    def __init__(self, center):
+        super().__init__(center)
+        self.scale_matrix = np.identity(3)
+        # Points taken from here: https://en.wikipedia.org/wiki/Tetrahedron
+        points = [( 1,  0, -1/np.sqrt([2])),
+                  (-1,  0, -1/np.sqrt([2])),
+                  ( 0,  1,  1/np.sqrt([2])),
+                  ( 0, -1,  1/np.sqrt([2]))]
+
+        self.triangle_faces = [(points[0], points[1], points[2]),
+                               (points[0], points[2], points[3]),
+                               (points[0], points[3], points[1]),
+                               (points[3], points[2], points[1])]
+        self.triangle_faces = np.array(self.triangle_faces)
+
+    def scale(self, factor, axis=None):
+        if axis is None:
+            self.scale_matrix = factor * self.scale_matrix
+            return
+
+        assert axis >= 0 and axis < 3
+        self.scale_matrix[axis] = self.scale_matrix[axis] * factor
+
+    def render(self):
+        modified = self.triangle_faces.reshape(12, 3)
+        modified = np.dot(modified, self.scale_matrix)
+        modified = np.dot(modified, self.rotation_matrix)
+        modified = modified.reshape(4, 3, 3)
+        offset = np.tile(self.center, (4, 3, 1))
+        modified += offset
+        return [Tri(tuple(face)) for face in modified]
+
 
 if __name__ == '__main__':
     sp = Sphere((0, 0, 0), 5)
