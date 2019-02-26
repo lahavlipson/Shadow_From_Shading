@@ -61,6 +61,8 @@ class Cuboid(Shape):
         modified = self.triangle_faces.reshape(36, 3)
         modified = np.dot(modified, self.scale_matrix)
         modified = modified.reshape(12, 3, 3)
+        offset = np.tile(self.center, (12, 3, 1))
+        modified += offset
         return [Tri(tuple(face)) for face in modified]
 
 
