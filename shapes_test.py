@@ -1,11 +1,14 @@
-from shapes import Sphere
+from shapes import Sphere, Cuboid
 from renderer import Renderer, Cam, Lit, Tri
 
 rend = Renderer("./Renderer")
 
-sp = Sphere((0, 0, 0), 25)
+sp = Sphere((0, 75, 0), 25)
 shapes = sp.render()
-print(shapes)
+cuboid = Cuboid((100, 50, -100))
+cuboid.scale(50)
+cuboid.rotate(45, 90)
+shapes.extend(cuboid.render())
 
 background_prims = []
 background_prims.append(Tri([(-1000.00,-40.00,1000.00), (1000.00,-40.00, 1000.00), (-1000.00,-40.00,-1000.00)]))

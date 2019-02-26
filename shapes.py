@@ -4,12 +4,25 @@ import numpy as np
 class Shape:
     def __init__(self, center):
         self.center = center
+        self.rotation_matrix = np.identity(3)
 
     def translate(self, offset):
         self.center = self.center + offset
 
     def rotate(self, pitch, yaw):
-        pass
+        c = np.cos(np.deg2rad(pitch))
+        s = np.sin(np.deg2rad(pitch))
+        pitch_matrix = np.array(((c, -s, 0),
+                                 (s,  c, 0),
+                                 (0,  0, 1)))
+        self.rotation_matrix = np.dot(pitch_matrix, self.rotation_matrix)
+
+        c = np.cos(np.deg2rad(yaw))
+        s = np.sin(np.deg2rad(yaw))
+        yaw_matrix = np.array(((1, 0,  0),
+                               (0, c, -s),
+                               (0, s,  c)))
+        self.rotation_matrix = np.dot(yaw_matrix, self.rotation_matrix)
 
     def render(self):
         pass
@@ -40,14 +53,13 @@ class Cuboid(Shape):
                                (( 0.5,  0.5,  0.5), ( 0.5, -0.5, -0.5), ( 0.5,  0.5, -0.5)),
                                (( 0.5,  0.5,  0.5), ( 0.5,  0.5, -0.5), (-0.5,  0.5, -0.5)),
 
-                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
-                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
-                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
-                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
-                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5)),
-                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5), (-0.5, -0.5, -0.5))]
+                               ((-0.5, -0.5, -0.5), (-0.5,  0.5, -0.5), ( 0.5,  0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), ( 0.5,  0.5, -0.5), ( 0.5, -0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), (-0.5,  0.5,  0.5), (-0.5,  0.5, -0.5)),
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5,  0.5), (-0.5,  0.5,  0.5)),
+                               ((-0.5, -0.5, -0.5), ( 0.5, -0.5, -0.5), ( 0.5, -0.5,  0.5)),
+                               ((-0.5, -0.5, -0.5), ( 0.5, -0.5,  0.5), (-0.5, -0.5,  0.5))]
         self.triangle_faces = np.array(self.triangle_faces)
-
 
     def scale(self, factor, axis=None):
         if axis is None:
@@ -60,6 +72,7 @@ class Cuboid(Shape):
     def render(self):
         modified = self.triangle_faces.reshape(36, 3)
         modified = np.dot(modified, self.scale_matrix)
+        modified = np.dot(modified, self.rotation_matrix)
         modified = modified.reshape(12, 3, 3)
         offset = np.tile(self.center, (12, 3, 1))
         modified += offset
