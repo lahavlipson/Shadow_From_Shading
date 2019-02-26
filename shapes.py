@@ -24,11 +24,23 @@ class Shape:
                                (0, s,  c)))
         self.rotation_matrix = np.dot(yaw_matrix, self.rotation_matrix)
 
-    def render(self):
-        pass
-
     def scale(self, factor, axis=None):
-       pass
+        if axis is None:
+            self.scale_matrix = factor * self.scale_matrix
+            return
+
+        assert axis >= 0 and axis < 3
+        self.scale_matrix[axis] = self.scale_matrix[axis] * factor
+
+    def render(self):
+        dimensions = self.triangle_faces.shape
+        modified = self.triangle_faces.reshape(dimensions[0] * dimensions[1], 3)
+        modified = np.dot(modified, self.scale_matrix)
+        modified = np.dot(modified, self.rotation_matrix)
+        modified = modified.reshape(dimensions[0], dimensions[1], 3)
+        offset = np.tile(self.center, (dimensions[0], dimensions[1], 1))
+        modified += offset
+        return [Tri(tuple(face)) for face in modified]
 
 class Sphere(Shape):
     def __init__(self, center, radius):
@@ -61,23 +73,6 @@ class Cuboid(Shape):
                                ((-0.5, -0.5, -0.5), ( 0.5, -0.5,  0.5), (-0.5, -0.5,  0.5))]
         self.triangle_faces = np.array(self.triangle_faces)
 
-    def scale(self, factor, axis=None):
-        if axis is None:
-            self.scale_matrix = factor * self.scale_matrix
-            return
-
-        assert axis >= 0 and axis < 3
-        self.scale_matrix[axis] = self.scale_matrix[axis] * factor
-
-    def render(self):
-        modified = self.triangle_faces.reshape(36, 3)
-        modified = np.dot(modified, self.scale_matrix)
-        modified = np.dot(modified, self.rotation_matrix)
-        modified = modified.reshape(12, 3, 3)
-        offset = np.tile(self.center, (12, 3, 1))
-        modified += offset
-        return [Tri(tuple(face)) for face in modified]
-
 class Tetrahedron(Shape):
     def __init__(self, center):
         super().__init__(center)
@@ -93,23 +88,6 @@ class Tetrahedron(Shape):
                                (points[0], points[3], points[1]),
                                (points[3], points[2], points[1])]
         self.triangle_faces = np.array(self.triangle_faces)
-
-    def scale(self, factor, axis=None):
-        if axis is None:
-            self.scale_matrix = factor * self.scale_matrix
-            return
-
-        assert axis >= 0 and axis < 3
-        self.scale_matrix[axis] = self.scale_matrix[axis] * factor
-
-    def render(self):
-        modified = self.triangle_faces.reshape(12, 3)
-        modified = np.dot(modified, self.scale_matrix)
-        modified = np.dot(modified, self.rotation_matrix)
-        modified = modified.reshape(4, 3, 3)
-        offset = np.tile(self.center, (4, 3, 1))
-        modified += offset
-        return [Tri(tuple(face)) for face in modified]
 
 
 if __name__ == '__main__':
