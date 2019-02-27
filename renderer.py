@@ -77,7 +77,6 @@ class Renderer:
             for p in object_prims:
                 text_file.write(str(p) + NL)
             text_file.write(str(Mat(background_surface_color)) + NL)
-            assert(len(background_prims) == 2)
             for p in background_prims:
                 text_file.write(str(p) + NL)
             text_file.write(str(light) + NL)
@@ -86,7 +85,7 @@ class Renderer:
             
 
     def render(self, camera, light, object_prims, background_prims, object_color=(1,0,0), \
-               background_surface_color=(0.5,0.5,0.5), ambient_light_intensity=0.2):
+               background_surface_color=(0.9,0.9,0.9), ambient_light_intensity=0.2):
         file_base_name = os.path.join(self.folder,"scene_" + str(self.number_of_scenes_written+1))
         scene_file_name = file_base_name + SCN
         output_file_names =  file_base_name + "_shadow" + PNG, file_base_name + "_shadowless" + PNG

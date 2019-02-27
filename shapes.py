@@ -51,7 +51,8 @@ class Sphere(Shape):
         pass
 
     def scale(self, factor, axis=None):
-        self.radius = radius * factor
+        if axis == 0:
+            self.radius *= factor
 
     def render(self):
         # Returns a list for sake of consistency with other render methods
