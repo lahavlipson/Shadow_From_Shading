@@ -3,15 +3,19 @@ from renderer import Renderer, Cam, Lit, Tri
 
 rend = Renderer("./Renderer")
 
-sp = Sphere((0, 75, 0), 25)
+sp = Sphere((0, 0, 0), 25)
 shapes = sp.render()
-cuboid = Cuboid((30, 25, -100))
-cuboid.scale(25)
-cuboid.rotate(45, 90)
+cuboid = Cuboid((0, 0, -100))
+cuboid.scale(25, axis=0)
+cuboid.scale(50, axis=1)
+cuboid.scale(75, axis=2)
+cuboid.rotate(90, 90)
 shapes.extend(cuboid.render())
-tetrahedron = Tetrahedron((100, 50, -100))
-tetrahedron.scale(25)
-tetrahedron.rotate(45, 90)
+tetrahedron = Tetrahedron((100, 0, 0))
+tetrahedron.scale(25, axis=0)
+tetrahedron.scale(50, axis=1)
+tetrahedron.scale(20, axis=2)
+tetrahedron.rotate(45, 180)
 shapes.extend(tetrahedron.render())
 
 background_prims = []
