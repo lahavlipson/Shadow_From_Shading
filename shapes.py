@@ -58,6 +58,9 @@ class Sphere(Shape):
         # Returns a list for sake of consistency with other render methods
         return [Cir((self.center, self.radius))]
 
+    def __str__(self):
+        return "Sphere"
+
 class Cuboid(Shape):
     def __init__(self, center):
         super().__init__(center)
@@ -76,6 +79,9 @@ class Cuboid(Shape):
                                ((-0.5, -0.5, -0.5), ( 0.5, -0.5,  0.5), (-0.5, -0.5,  0.5))]
         self.triangle_faces = np.array(self.triangle_faces)
 
+    def __str__(self):
+        return "Cuboid"
+
 class Tetrahedron(Shape):
     def __init__(self, center):
         super().__init__(center)
@@ -91,6 +97,9 @@ class Tetrahedron(Shape):
                                (points[0], points[3], points[1]),
                                (points[3], points[2], points[1])]
         self.triangle_faces = np.array(self.triangle_faces)
+
+    def __str__(self):
+        return "Tetrahedron"
 
 
 if __name__ == '__main__':
