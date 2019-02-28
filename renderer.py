@@ -84,14 +84,22 @@ class Renderer:
             text_file.write(str(camera))    
             
 
-    def render(self, camera, light, object_prims, background_prims, object_color=(1,0,0), \
-               background_surface_color=(0.9,0.9,0.9), ambient_light_intensity=0.2):
-        file_base_name = os.path.join(self.folder,"scene_" + str(self.number_of_scenes_written+1))
-        scene_file_name = file_base_name + SCN
-        output_file_names =  file_base_name + "_shadow" + PNG, file_base_name + "_shadowless" + PNG
-        self.__write_scene_file(scene_file_name, camera, light, object_prims, background_prims, \
-                                object_color, background_surface_color, ambient_light_intensity)
-        os.system(self.executable + " " + scene_file_name + " " + output_file_names[0] + " " + output_file_names[1])
+    def render(self, cameras, light, object_prims, background_prims, object_color=(1,0,0), \
+               background_surface_color=(0.9, 0.9, 0.9), ambient_light_intensity=0.2):
+
+        scene_folder_name = os.path.join(self.folder,"scene_" + str(self.number_of_scenes_written+1))
+        if not os.path.isdir(scene_folder_name):
+            os.mkdir(scene_folder_name)
+
+        for i in range(len(cameras)):
+            camera = cameras[i]
+            print(len(cameras))
+            scene_file_name = os.path.join(scene_folder_name, "scene" + SCN)
+            output_file_names = os.path.join(scene_folder_name,"shadow_" + str(i) + PNG), \
+                                os.path.join(scene_folder_name,"shadowless_" + str(i) + PNG)
+            self.__write_scene_file(scene_file_name, camera, light, object_prims, background_prims, \
+                                    object_color, background_surface_color, ambient_light_intensity)
+            os.system(self.executable + " " + scene_file_name + " " + output_file_names[0] + " " + output_file_names[1])
         self.number_of_scenes_written += 1
         return imread(output_file_names[0]),imread(output_file_names[1])
 

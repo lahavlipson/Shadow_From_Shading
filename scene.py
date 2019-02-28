@@ -26,7 +26,8 @@ class Scene:
 
 
         self.light = Lit((100, 500, -80), 130000)
-        self.camera = Cam((0, 382*0.6, -273*0.6), (0, -.3, 1), (640, 480))
+        self.cameras = [Cam((0, 230, -164), (0, -.3, 1), (640, 480)), \
+                        Cam((30, 230, -164), (0, -.3, 1), (640, 480))]
 
 
     def add_object(self):
@@ -57,7 +58,7 @@ class Scene:
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
-        return self.rend.render(self.camera, self.light, surface_prims, self.background_prims)
+        return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims)
 
 
 g = Scene()
