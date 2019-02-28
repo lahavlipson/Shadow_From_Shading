@@ -1,6 +1,6 @@
 from shapes import Sphere, Cuboid, Tetrahedron
 from renderer import Renderer, Cam, Lit, Tri
-from random import randint, uniform
+from random import randint, uniform, shuffle
 
 
 
@@ -31,18 +31,27 @@ class Scene:
 
 
     def add_object(self):
-        shape = [Sphere(self.center, 1), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
+        shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
         for i in range(3):
             shape.scale(randint(15,40), axis=i)
         self.__rotate_object(shape)
         self.__translate_object(shape)
         self.shapes.append(shape)
 
+    def crossover(self, scene):
+        offspring = Scene()
+        offspring.shapes = self.shapes + scene.shapes
+        shuffle(offspring.shapes)
+        offspring.shapes = offspring.shapes[:len(offspring.shapes)//2]
+        return offspring
+
     def mutate(self):
-        shape = self.shapes[randint(0, len(self.shapes) - 1)]
-        mutation = [self.__scale_object, self.__translate_object, self.__rotate_object][randint(0,2)]
-        print("\n\n\n", shape, mutation,"\n\n\n")
-        mutation(shape)
+        if randint(0,1) == 0:
+            self.add_object()
+        else:
+            shape = self.shapes[randint(0, len(self.shapes) - 1)]
+            mutation = [self.__scale_object, self.__translate_object, self.__rotate_object][randint(0,2)]
+            mutation(shape)
 
     def __scale_object(self, shape):
         for i in range(3):
@@ -54,16 +63,10 @@ class Scene:
     def __rotate_object(self, shape):
         shape.rotate(randint(0, 359), randint(0, 359))
 
-    def render(self):
+    def render(self, name=""):
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
-        return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims)
+        return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims,name=name)
 
 
-g = Scene()
-for _ in range(3):
-    g.add_object()
-shadow_numpy_arr, shadowless_numpy_arr = g.render()
-g.mutate()
-shadow_numpy_arr, shadowless_numpy_arr = g.render()

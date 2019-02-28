@@ -4,3 +4,4 @@ __pycache__/
 tmp_scenes/
 ShadowRenderer
 .idea/
+*.scn
