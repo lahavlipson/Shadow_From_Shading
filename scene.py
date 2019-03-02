@@ -13,27 +13,27 @@ class Scene:
 
         self.shapes = []
         
-        self.center = (0, 180, 150)
+        self.center = (0, 140, 150)
 
         self.background_prims = []
         self.background_prims.append(
-            Tri([(-1000, -40, 1000), (1000, -40, 1000), (-1000, -40, -1000)]))
+            Tri([(-10000, -40, 1000), (10000, -40, 10000), (-10000, -40, -10000)]))
         self.background_prims.append(
-            Tri([(-1000, -40, -1000), (1000, -40, 1000), (1000, -40, -1000)]))
+            Tri([(-10000, -40, -10000), (10000, -40, 10000), (10000, -40, -10000)]))
         self.background_prims.append(
-            Tri([(-2000, -50, 800), (0, 500, 800), (2000, -50, 800)]))
+            Tri([(-10000, -50, 800), (0, 5000, 800), (10000, -50, 800)]))
 
 
 
         self.light = Lit((100, 500, -80), 130000)
-        self.cameras = [Cam((0, 230, -164), (0, -.3, 1), (640, 480)), \
-                        Cam((30, 230, -164), (0, -.3, 1), (640, 480))]
+        self.cameras = [Cam((0, 230, -200), (0, -.3, 1), (640, 480)), \
+                        Cam((300, 230, -200), (-0.8, -.3, 1), (640, 480)), \
+                        Cam((-300, 230, -200), (0.8, -.3, 1), (640, 480))]
 
 
     def add_object(self):
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
-        for i in range(3):
-            shape.scale(randint(15,40), axis=i)
+        shape.scale(randint(15,40))
         self.__rotate_object(shape)
         self.__translate_object(shape)
         self.shapes.append(shape)
@@ -70,3 +70,6 @@ class Scene:
         return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims,name=name)
 
 
+g = Scene()
+g.add_object()
+_,_ = g.render("report")

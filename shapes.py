@@ -1,5 +1,7 @@
 from renderer import Cir, Tri
 import numpy as np
+from random import randint, uniform, shuffle
+
 
 class Shape:
     def __init__(self, center):
@@ -51,7 +53,7 @@ class Sphere(Shape):
         pass
 
     def scale(self, factor, axis=None):
-        if axis == 0:
+        if axis == 0 or axis is None:
             self.radius *= factor
 
     def render(self):
@@ -97,6 +99,17 @@ class Tetrahedron(Shape):
                                (points[0], points[3], points[1]),
                                (points[3], points[2], points[1])]
         self.triangle_faces = np.array(self.triangle_faces)
+
+    #Needs to be tested further
+    def expand(self):
+        side = self.triangle_faces[randint(0,self.triangle_faces.shape[0]-1)]
+        print("expand called!", side.shape, self.triangle_faces.shape)
+        centroid = (sum(side[:,0])/3, sum(side[:,1])/3, sum(side[:,2])/3) + 0.6*np.cross(side[2]-side[1],side[0]-side[1])
+        f1 = np.array([side[0],side[1],centroid]).reshape((1,3,3))
+        f2 = np.array([side[1], side[2], centroid]).reshape((1,3,3))
+        f3 = np.array([centroid, side[2], side[0]]).reshape((1,3,3))
+
+        self.triangle_faces = np.concatenate((self.triangle_faces, f1,f2,f3),axis=0)
 
     def __str__(self):
         return "Tetrahedron"
