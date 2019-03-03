@@ -1,5 +1,6 @@
 import os
 import renderer_lib
+import numpy as np
 
 SCN = ".scn"
 PNG = ".png"
@@ -76,13 +77,15 @@ class Renderer:
 
     def render(self, cameras, light, object_prims, background_prims, object_color=(1,0,0), \
                background_surface_color=(0.9, 0.9, 0.9), ambient_light_intensity=0.2, name="output"):
-        output = []
+        shadows = []
+        noshadows = []
         for camera in cameras:
             scene_text = self.__write_scene(camera, light, object_prims, background_prims, \
                                     object_color, background_surface_color, ambient_light_intensity)
             rend_output = renderer_lib.render(scene_text, 480, 640)
             shadow, noshadow = rend_output.reshape((2, 480, 640, 3))
-            output.append((shadow, noshadow))
-        return output
+            shadows.append(shadow)
+            noshadows.append(noshadow)
+        return np.array(shadows), np.array(noshadows)
 
 
