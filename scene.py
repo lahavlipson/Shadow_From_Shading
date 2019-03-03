@@ -68,4 +68,13 @@ class Scene:
             surface_prims += shape.render()
         return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims,name=name)
 
-
+if __name__ == '__main__':
+    g = Scene()
+    g.add_object()
+    output = g.render()
+    if not os.path.isdir("tmp_scenes"):
+        os.mkdir("tmp_scenes")
+    for i in range(len(output)):
+        shadow, noshadow = output[i]
+        cv.imwrite(os.path.join("tmp_scenes","shadow"+str(i)+".png"), shadow)
+        cv.imwrite(os.path.join("tmp_scenes","noshadow"+str(i)+".png"), noshadow)
