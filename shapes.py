@@ -1,6 +1,7 @@
 from renderer import Cir, Tri
 import numpy as np
 from random import randint, uniform, shuffle
+from math import sqrt
 
 
 class Shape:
@@ -89,10 +90,10 @@ class Tetrahedron(Shape):
         super().__init__(center)
         self.scale_matrix = np.identity(3)
         # Points taken from here: https://en.wikipedia.org/wiki/Tetrahedron
-        points = [( 1,  0, -1/np.sqrt([2])),
-                  (-1,  0, -1/np.sqrt([2])),
-                  ( 0,  1,  1/np.sqrt([2])),
-                  ( 0, -1,  1/np.sqrt([2]))]
+        points = [( 1,  0, -1/sqrt(2)),
+                  (-1,  0, -1/sqrt(2)),
+                  ( 0,  1,  1/sqrt(2)),
+                  ( 0, -1,  1/sqrt(2))]
 
         self.triangle_faces = [(points[0], points[1], points[2]),
                                (points[0], points[2], points[3]),
