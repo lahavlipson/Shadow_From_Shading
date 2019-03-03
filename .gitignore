@@ -5,3 +5,4 @@ tmp_scenes/
 ShadowRenderer
 .idea/
 *.scn
+*.txt
