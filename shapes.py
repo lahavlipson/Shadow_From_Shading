@@ -1,5 +1,8 @@
 from renderer import Cir, Tri
 import numpy as np
+from random import randint, uniform, shuffle
+from math import sqrt
+
 
 class Shape:
     def __init__(self, center):
@@ -51,11 +54,15 @@ class Sphere(Shape):
         pass
 
     def scale(self, factor, axis=None):
-        self.radius = radius * factor
+        if axis == 0 or axis is None:
+            self.radius *= factor
 
     def render(self):
         # Returns a list for sake of consistency with other render methods
         return [Cir((self.center, self.radius))]
+
+    def __str__(self):
+        return "Sphere"
 
 class Cuboid(Shape):
     def __init__(self, center):
@@ -75,21 +82,38 @@ class Cuboid(Shape):
                                ((-0.5, -0.5, -0.5), ( 0.5, -0.5,  0.5), (-0.5, -0.5,  0.5))]
         self.triangle_faces = np.array(self.triangle_faces)
 
+    def __str__(self):
+        return "Cuboid"
+
 class Tetrahedron(Shape):
     def __init__(self, center):
         super().__init__(center)
         self.scale_matrix = np.identity(3)
         # Points taken from here: https://en.wikipedia.org/wiki/Tetrahedron
-        points = [( 1,  0, -1/np.sqrt([2])),
-                  (-1,  0, -1/np.sqrt([2])),
-                  ( 0,  1,  1/np.sqrt([2])),
-                  ( 0, -1,  1/np.sqrt([2]))]
+        points = [( 1,  0, -1/sqrt(2)),
+                  (-1,  0, -1/sqrt(2)),
+                  ( 0,  1,  1/sqrt(2)),
+                  ( 0, -1,  1/sqrt(2))]
 
         self.triangle_faces = [(points[0], points[1], points[2]),
                                (points[0], points[2], points[3]),
                                (points[0], points[3], points[1]),
                                (points[3], points[2], points[1])]
         self.triangle_faces = np.array(self.triangle_faces)
+
+    #Needs to be tested further
+    def expand(self):
+        side = self.triangle_faces[randint(0,self.triangle_faces.shape[0]-1)]
+        print("expand called!", side.shape, self.triangle_faces.shape)
+        centroid = (sum(side[:,0])/3, sum(side[:,1])/3, sum(side[:,2])/3) + 0.6*np.cross(side[2]-side[1],side[0]-side[1])
+        f1 = np.array([side[0],side[1],centroid]).reshape((1,3,3))
+        f2 = np.array([side[1], side[2], centroid]).reshape((1,3,3))
+        f3 = np.array([centroid, side[2], side[0]]).reshape((1,3,3))
+
+        self.triangle_faces = np.concatenate((self.triangle_faces, f1,f2,f3),axis=0)
+
+    def __str__(self):
+        return "Tetrahedron"
 
 
 if __name__ == '__main__':

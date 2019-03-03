@@ -1,7 +1,7 @@
 from renderer import Renderer, Tri, Cir, Cam, Lit
+import cv2
 
-
-rend = Renderer("./Renderer")
+rend = Renderer()
 object_prims = []
 object_prims.append(Tri([(-40,0,20.0),(0,0,-20.0),(40,0,20)]))
 object_prims.append(Tri([(0,40,0),(0,0,-20),(-40,0,20.0)]))
@@ -24,5 +24,8 @@ background_prims.append(Tri([(-1000.00,-40.00,-1000.00), (1000.00,-40.00, 1000.0
 
 
 light = Lit((125,300,35),79000)
-camera = Cam((200,222,83),( -.5,-.7,-.5), (640,480))
-shadow_numpy_arr, shadowless_numpy_arr = rend.render(camera, light,object_prims, background_prims)
+camera = [Cam((200,222,83),( -.5,-.7,-.5), (640,480))]
+output = rend.render(camera, light,object_prims, background_prims)
+for shadow, noshadow in output:
+    cv2.imwrite("shadow.png", shadow)
+    cv2.imwrite("noshadow.png", noshadow)
