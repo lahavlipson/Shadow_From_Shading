@@ -1,5 +1,5 @@
 import os
-from scipy.ndimage import imread
+import renderer_lib
 
 SCN = ".scn"
 PNG = ".png"
@@ -60,44 +60,37 @@ class Mat:
 
 class Renderer:
     
-    def __init__(self, exec_path, tmp_folder=None):
+    def __init__(self, tmp_folder=None):
         if tmp_folder is not None:
             self.folder = tmp_folder
         else:
             if not os.path.isdir("tmp_scenes"):
                 os.mkdir("tmp_scenes")
             self.folder = "tmp_scenes"
-        self.executable = exec_path
 
-    def __write_scene_file(self, scene_file_name, camera, light, object_prims, 
-                           background_prims, object_color, background_surface_color, ambient_light_intensity):
-        with open(scene_file_name, "w") as text_file: 
-            text_file.write(str(Mat(object_color)) + NL)
-            for p in object_prims:
-                text_file.write(str(p) + NL)
-            text_file.write(str(Mat(background_surface_color)) + NL)
-            for p in background_prims:
-                text_file.write(str(p) + NL)
-            text_file.write(str(light) + NL)
-            text_file.write("l a" + (" " + str(ambient_light_intensity))*3 + NL)
-            text_file.write(str(camera))    
+    def __write_scene(self, camera, light, object_prims,
+                      background_prims, object_color, background_surface_color, ambient_light_intensity):
+        text_file = (str(Mat(object_color)) + NL)
+        for p in object_prims:
+            text_file += (str(p) + NL)
+        text_file += (str(Mat(background_surface_color)) + NL)
+        for p in background_prims:
+            text_file += (str(p) + NL)
+        text_file += (str(light) + NL)
+        text_file += ("l a" + (" " + str(ambient_light_intensity))*3 + NL)
+        text_file += (str(camera))
+        return text_file
             
 
     def render(self, cameras, light, object_prims, background_prims, object_color=(1,0,0), \
                background_surface_color=(0.9, 0.9, 0.9), ambient_light_intensity=0.2, name="output"):
-
-        scene_folder_name = os.path.join(self.folder,"scene_" + name)
-        if not os.path.isdir(scene_folder_name):
-            os.mkdir(scene_folder_name)
-
-        for i in range(len(cameras)):
-            camera = cameras[i]
-            scene_file_name = os.path.join(scene_folder_name, "scene" + SCN)
-            output_file_names = os.path.join(scene_folder_name,"shadow_" + str(i) + PNG), \
-                                os.path.join(scene_folder_name,"shadowless_" + str(i) + PNG)
-            self.__write_scene_file(scene_file_name, camera, light, object_prims, background_prims, \
+        output = []
+        for camera in cameras:
+            scene_text = self.__write_scene(camera, light, object_prims, background_prims, \
                                     object_color, background_surface_color, ambient_light_intensity)
-            os.system(self.executable + " " + scene_file_name + " " + output_file_names[0] + " " + output_file_names[1])
-        return imread(output_file_names[0]),imread(output_file_names[1])
+            rend_output = renderer_lib.render(scene_text, 480, 640)
+            shadow, noshadow = rend_output.reshape((2, 480, 640, 3))
+            output.append((shadow, noshadow))
+        return output
 
 
