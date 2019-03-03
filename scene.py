@@ -1,15 +1,14 @@
 from shapes import Sphere, Cuboid, Tetrahedron
 from renderer import Renderer, Cam, Lit, Tri
 from random import randint, uniform, shuffle
-
+import cv2 as cv
+import os
 
 
 class Scene:
 
     def __init__(self):
-        # self.shapes = []
-
-        self.rend = Renderer("./Renderer")
+        self.rend = Renderer()
 
         self.shapes = []
         
@@ -33,7 +32,7 @@ class Scene:
 
     def add_object(self):
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
-        shape.scale(randint(15,40))
+        shape.scale(randint(25,40))
         self.__rotate_object(shape)
         self.__translate_object(shape)
         self.shapes.append(shape)
@@ -70,6 +69,3 @@ class Scene:
         return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims,name=name)
 
 
-g = Scene()
-g.add_object()
-_,_ = g.render("report")

@@ -59,14 +59,6 @@ class Mat:
 
 
 class Renderer:
-    
-    def __init__(self, tmp_folder=None):
-        if tmp_folder is not None:
-            self.folder = tmp_folder
-        else:
-            if not os.path.isdir("tmp_scenes"):
-                os.mkdir("tmp_scenes")
-            self.folder = "tmp_scenes"
 
     def __write_scene(self, camera, light, object_prims,
                       background_prims, object_color, background_surface_color, ambient_light_intensity):
