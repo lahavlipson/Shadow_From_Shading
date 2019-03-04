@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 class ShapeDataset(Dataset):
 
     def __init__(self, args):
-        self.length = 1000#Totally Arbitrary
+        self.length = args.ep_len
 
     def __len__(self):
         return self.length
@@ -19,6 +19,4 @@ class ShapeDataset(Dataset):
 
 
 if __name__ == '__main__':
-    print("oi!")
     ds = ShapeDataset()
-    ds[0]
