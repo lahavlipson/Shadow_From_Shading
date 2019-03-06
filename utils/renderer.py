@@ -1,6 +1,13 @@
 import os
-import renderer_lib
 import numpy as np
+import sys
+
+if sys.platform[:5] == 'linux':
+    print("Running on Linux")
+    import renderer_lib_linux as renderer_lib
+else:
+    print("Running on MacOS")
+    import renderer_lib_macos as renderer_lib
 
 SCN = ".scn"
 PNG = ".png"
