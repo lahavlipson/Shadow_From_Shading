@@ -15,7 +15,7 @@ class ShapeDataset(Dataset):
         sc = Scene()
         sc.add_object()
         shadows, noshadows = sc.render()
-        return torch.Tensor(shadows).permute(2, 0, 1), torch.Tensor(noshadows).permute(2, 0, 1)
+        return torch.Tensor(noshadows).permute(2, 0, 1), torch.Tensor(shadows).permute(2, 0, 1)
 
     def print_numpy(arr, filename):
         cv2.imwrite(filename, arr)
