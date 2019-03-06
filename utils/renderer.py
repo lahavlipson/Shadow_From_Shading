@@ -86,6 +86,6 @@ class Renderer:
             shadow, noshadow = rend_output.reshape((2, 480, 640, 3))
             shadows.append(shadow)
             noshadows.append(noshadow)
-        return np.array(shadows), np.array(noshadows)
+        return np.concatenate(shadows, axis=1), np.concatenate(noshadows, axis=1)
 
 

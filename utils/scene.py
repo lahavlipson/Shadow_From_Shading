@@ -1,5 +1,5 @@
-from shapes import Sphere, Cuboid, Tetrahedron
-from renderer import Renderer, Tri, Lit, Cam
+from utils.shapes import Sphere, Cuboid, Tetrahedron
+from utils.renderer import Renderer, Tri, Lit, Cam
 from random import randint, uniform, shuffle
 import cv2 as cv
 import os
@@ -74,7 +74,5 @@ if __name__ == '__main__':
     shadows, noshadows = g.render()
     if not os.path.isdir("tmp_scenes"):
         os.mkdir("tmp_scenes")
-    for i in range(len(shadows)):
-        shadow, noshadow = shadows[i], noshadows[i]
-        cv.imwrite(os.path.join("tmp_scenes","shadow"+str(i)+".png"), shadow)
-        cv.imwrite(os.path.join("tmp_scenes","noshadow"+str(i)+".png"), noshadow)
+    cv.imwrite(os.path.join("tmp_scenes","shadows.png"), shadows)
+    cv.imwrite(os.path.join("tmp_scenes","noshadows.png"), noshadows)

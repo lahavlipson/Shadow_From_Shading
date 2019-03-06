@@ -1,4 +1,4 @@
-from renderer import Cir, Tri
+from utils.renderer import Cir, Tri
 import numpy as np
 from random import randint, uniform, shuffle
 from math import sqrt
