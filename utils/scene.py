@@ -1,5 +1,5 @@
-from shapes import Sphere, Cuboid, Tetrahedron
-from renderer import Renderer, Cam, Lit, Tri
+from utils.shapes import Sphere, Cuboid, Tetrahedron
+from utils.renderer import Renderer, Tri, Lit, Cam
 from random import randint, uniform, shuffle
 import cv2 as cv
 import os
@@ -25,8 +25,8 @@ class Scene:
 
 
         self.light = Lit((100, 500, -80), 130000)
-        self.cameras = [Cam((0, 230, -200), (0, -.3, 1), (640, 480)), \
-                        Cam((300, 230, -200), (-0.8, -.3, 1), (640, 480)), \
+        self.cameras = [Cam((300, 230, -200), (-0.8, -.3, 1), (640, 480)), \
+                        Cam((0, 230, -200), (0, -.3, 1), (640, 480)), \
                         Cam((-300, 230, -200), (0.8, -.3, 1), (640, 480))]
 
 
@@ -71,10 +71,8 @@ class Scene:
 if __name__ == '__main__':
     g = Scene()
     g.add_object()
-    output = g.render()
+    shadows, noshadows = g.render()
     if not os.path.isdir("tmp_scenes"):
         os.mkdir("tmp_scenes")
-    for i in range(len(output)):
-        shadow, noshadow = output[i]
-        cv.imwrite(os.path.join("tmp_scenes","shadow"+str(i)+".png"), shadow)
-        cv.imwrite(os.path.join("tmp_scenes","noshadow"+str(i)+".png"), noshadow)
+    cv.imwrite(os.path.join("tmp_scenes","shadows.png"), shadows)
+    cv.imwrite(os.path.join("tmp_scenes","noshadows.png"), noshadows)
