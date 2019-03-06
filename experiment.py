@@ -4,7 +4,6 @@ import os
 from shadow_net import ShadowNet
 from utils.helpers import define_parser, mean
 from utils.dataset import ShapeDataset
-import cv2
 
 class Experiment:
 
@@ -27,6 +26,7 @@ class Experiment:
     def run(self):
 
         for epoch in range(1, self.EPOCHS + 1):
+            self.evaluate(epoch, 7)
             self.train(epoch)
 
     def train(self, epoch):
@@ -53,9 +53,24 @@ class Experiment:
 
             # print("Finished iteration")
 
-    # def evaluate(self, num_samples):
-    #     for i, (shadowless_views, shadowed_views) in enumerate(self.dataloader):
+    def evaluate(self, epoch, num_samples):
+        print("Evaluation Epoch", epoch)
+        if not os.path.isdir("tmp_scenes"):
+            os.mkdir("tmp_scenes")
+        epoch_folder = os.path.join("tmp_scenes","epoch_"+str(epoch))
+        if not os.path.isdir(epoch_folder):
+            os.mkdir(epoch_folder)
 
+        for num in range(num_samples):
+            shadowless_view, shadowed_view = self.dataset[0]
+            if self.cuda:
+                shadowless_view = shadowless_view.cuda()
+                shadowed_view = shadowed_view.cuda()
+
+            estimated_shadowed_view = self.network(shadowless_view.unsqueeze(0))
+            ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input" + str(num) + ".png"))
+            ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
+            ShapeDataset.print_tensor(estimated_shadowed_view, os.path.join(epoch_folder, "network_output" + str(num) + ".png"))
 
 
 
