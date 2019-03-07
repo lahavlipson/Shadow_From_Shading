@@ -24,10 +24,10 @@ class Experiment:
             self.pixelwise_loss = self.pixelwise_loss.cuda()
 
     def run(self):
-
+        self.evaluate(0, 7)
         for epoch in range(1, self.EPOCHS + 1):
-            self.evaluate(epoch, 7)
             self.train(epoch)
+            self.evaluate(epoch, 7)
 
     def train(self, epoch):
         print("Training Epoch",epoch)
@@ -42,19 +42,15 @@ class Experiment:
             estimated_shadowed_views = self.network(shadowless_views)
             training_loss = self.pixelwise_loss(estimated_shadowed_views, shadowed_views)
             running_loss.append(training_loss.item())
-            print("Training loss:",mean(running_loss))
+            print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
             training_loss.backward()
             self.optimizer.step()
 
         self.training_losses.append(mean(running_loss))
 
-            # print("Iteration",i, shadowless_views[0].squeeze(0).shape, shadowless_views.min(), shadowless_views.max())
-            # ShapeDataset.print_tensor(shadowless_views[0], "shadowless_views.png")
-
-            # print("Finished iteration")
 
     def evaluate(self, epoch, num_samples):
-        print("Evaluation Epoch", epoch)
+        print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to tmp_scenes/")
         if not os.path.isdir("tmp_scenes"):
             os.mkdir("tmp_scenes")
         epoch_folder = os.path.join("tmp_scenes","epoch_"+str(epoch))
