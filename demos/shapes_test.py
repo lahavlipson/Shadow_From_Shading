@@ -1,8 +1,8 @@
-from shapes import Sphere, Cuboid, Tetrahedron
-from renderer import Renderer, Cam, Lit, Tri
+from utils.shapes import Sphere, Cuboid, Tetrahedron
+from utils.renderer import Renderer, Cam, Lit, Tri
 import cv2
 
-rend = Renderer("")
+rend = Renderer()
 
 sp = Sphere((0, 0, 0), 25)
 shapes = sp.render()
@@ -26,6 +26,6 @@ background_prims.append(Tri([(-1000.00,-40.00,-1000.00), (1000.00,-40.00, 1000.0
 
 light = Lit((125,300,35),79000)
 camera = [Cam((200,222,83),( -.5,-.7,-.5), (640,480))]
-shadow, noshadow = rend.render(camera, light, shapes, background_prims)[0]
+shadow, noshadow = rend.render(camera, light, shapes, background_prims)
 cv2.imwrite("shadow.png", shadow)
 cv2.imwrite("noshadow.png", noshadow)
