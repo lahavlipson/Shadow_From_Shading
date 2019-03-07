@@ -1,11 +1,15 @@
 # Shadow_From_Shading
 
 Example of how to run:
-`python3 experiment.py --niter 10 --ep_len 28 --batch_size 7 --workers 1 --cuda`
+`sudo python3 experiment.py --niter 10 --ep_len 100 --batch_size 8  --workers 8 --cuda`
 
 
 
 TODO:
+- Have network generate just the shadows and then overlay that on the input.
+- Have experiment.py write self.train_losses to a graph each epoch, so we can track progress.
+- Have experiment.py write the learned model weights to a file each epoch, so we can stop the training and pick up where we left off. We need to make sure to delete old network weights since each file is like 1.2Gb.
+
 - Evolution class
     - Population = []
         - Will be the members (i.e. scene objects) of the population that are surviving. 
