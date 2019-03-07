@@ -24,10 +24,10 @@ class Experiment:
             self.pixelwise_loss = self.pixelwise_loss.cuda()
 
     def run(self):
-
+        self.evaluate(0, 7)
         for epoch in range(1, self.EPOCHS + 1):
-            self.evaluate(epoch, 7)
             self.train(epoch)
+            self.evaluate(epoch, 7)
 
     def train(self, epoch):
         print("Training Epoch",epoch)
@@ -39,8 +39,10 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadowed_views = self.network(shadowless_views)
-            training_loss = self.pixelwise_loss(estimated_shadowed_views, shadowed_views)
+            shadows = shadowless_views - shadowed_views
+
+            estimated_shadows = self.network(shadowless_views)
+            training_loss = self.pixelwise_loss(estimated_shadows, shadows)
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
             training_loss.backward()
@@ -48,10 +50,6 @@ class Experiment:
 
         self.training_losses.append(mean(running_loss))
 
-            # print("Iteration",i, shadowless_views[0].squeeze(0).shape, shadowless_views.min(), shadowless_views.max())
-            # ShapeDataset.print_tensor(shadowless_views[0], "shadowless_views.png")
-
-            # print("Finished iteration")
 
     def evaluate(self, epoch, num_samples):
         print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to tmp_scenes/")
@@ -67,7 +65,14 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
+            # Opposite of what is fed into network because otherwise values are negative
+            # and black on black is not visible
+            shadow = shadowed_view - shadowless_view
+            # multiply the shadow by some large factor to make them visible
+            shadow = shadow * 100
+
             estimated_shadowed_view = self.network(shadowless_view.unsqueeze(0))
+            ShapeDataset.print_tensor(shadow, os.path.join(epoch_folder, "shadow" + str(num) + ".png"))
             ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input" + str(num) + ".png"))
             ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
             ShapeDataset.print_tensor(estimated_shadowed_view, os.path.join(epoch_folder, "network_output" + str(num) + ".png"))
