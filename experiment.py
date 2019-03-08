@@ -1,9 +1,11 @@
 import torch
 import torch.utils.data
 import os
-from shadow_net import ShadowNet
+import numpy as np
+from shadow_net_cpu import ShadowNet
 from utils.helpers import define_parser, mean
 from utils.dataset import ShapeDataset
+from matplotlib import pyplot as plt
 
 class Experiment:
 
@@ -22,12 +24,27 @@ class Experiment:
         if self.cuda:
             self.network = self.network.cuda()
             self.pixelwise_loss = self.pixelwise_loss.cuda()
+        self.results_dir = args.res_dir
+        if not os.path.isdir(self.results_dir):
+            os.mkdir(self.results_dir)
 
     def run(self):
         self.evaluate(0, 7)
         for epoch in range(1, self.EPOCHS + 1):
             self.train(epoch)
             self.evaluate(epoch, 7)
+            np.savetxt(os.path.join(self.results_dir, 'total_training_loss.txt'), np.array(self.training_losses))
+            self.save_graph()
+
+    def save_graph(self):
+        plt.clf()
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.title("Training Loss")
+        plt.grid()
+        plt.plot(list(range(1, 1 + len(self.training_losses))), self.training_losses, label='Training Loss')
+        plt.legend()
+        plt.savefig(os.path.join(self.results_dir, 'loss_graph.png'))
 
     def train(self, epoch):
         print("Training Epoch",epoch)
@@ -40,7 +57,7 @@ class Experiment:
             self.optimizer.zero_grad()
 
             estimated_shadows = self.network(shadowless_views)
-            estimated_shadowed_views = (shadowless_views - estimated_shadows).clamp(0.0, 255.0)
+            estimated_shadowed_views = shadowless_views - estimated_shadows
             training_loss = self.pixelwise_loss(estimated_shadowed_views, shadowed_views)
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
@@ -51,10 +68,8 @@ class Experiment:
 
 
     def evaluate(self, epoch, num_samples):
-        print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to tmp_scenes/")
-        if not os.path.isdir("tmp_scenes"):
-            os.mkdir("tmp_scenes")
-        epoch_folder = os.path.join("tmp_scenes","epoch_"+str(epoch))
+        print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to", self.results_dir)
+        epoch_folder = os.path.join(self.results_dir,"epoch_"+str(epoch))
         if not os.path.isdir(epoch_folder):
             os.mkdir(epoch_folder)
 
@@ -65,10 +80,11 @@ class Experiment:
                 shadowed_view = shadowed_view.cuda()
 
             estimated_shadow = self.network(shadowless_view.unsqueeze(0)).squeeze(0)
-            estimated_shadowed_view = (shadowless_view - estimated_shadow).clamp(0.0, 255.0)
+            estimated_shadowed_view = shadowless_view - estimated_shadow
             ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input" + str(num) + ".png"))
             ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
-            ShapeDataset.print_tensor(estimated_shadowed_view, os.path.join(epoch_folder, "network_output" + str(num) + ".png"))
+            ShapeDataset.print_tensor(estimated_shadowed_view.clamp(0.0, 255.0), os.path.join(epoch_folder, \
+                                                                            "network_output" + str(num) + ".png"))
 
 
 

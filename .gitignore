@@ -7,4 +7,5 @@ ShadowRenderer
 *.scn
 *.png
 *.notes
+results
 shadow_net_cpu.py
