@@ -2,7 +2,7 @@ import torch
 import torch.utils.data
 import os
 import numpy as np
-from shadow_net_cpu import ShadowNet
+from shadow_net import ShadowNet
 from utils.helpers import define_parser, mean
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
