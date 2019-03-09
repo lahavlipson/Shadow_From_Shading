@@ -89,8 +89,9 @@ class Renderer:
         for camera in cameras:
             scene_text = self.__write_scene(camera, light, object_prims, background_prims, \
                                     object_color, background_surface_color, ambient_light_intensity)
-            rend_output = renderer_lib.render(scene_text, 480, 640)
-            shadow, noshadow = rend_output.reshape((2, 480, 640, 3))
+            y,x = cameras[0].resolution
+            rend_output = renderer_lib.render(scene_text, x, y)
+            shadow, noshadow = rend_output.reshape((2, x, y, 3))
             shadows.append(shadow)
             noshadows.append(noshadow)
         return np.concatenate(shadows, axis=1), np.concatenate(noshadows, axis=1)

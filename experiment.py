@@ -56,8 +56,7 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadows = self.network(shadowless_views)
-            estimated_shadowed_views = shadowless_views - estimated_shadows
+            estimated_shadowed_views = self.network(shadowless_views)
             training_loss = self.pixelwise_loss(estimated_shadowed_views, shadowed_views)
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
@@ -79,12 +78,11 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
-            estimated_shadow = self.network(shadowless_view.unsqueeze(0)).squeeze(0)
-            estimated_shadowed_view = shadowless_view - estimated_shadow
-            ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input" + str(num) + ".png"))
+            estimated_shadowed_view = self.network(shadowless_view.unsqueeze(0)).squeeze(0)
+            ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input_" + str(num) + ".png"))
             ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
             ShapeDataset.print_tensor(estimated_shadowed_view.clamp(0.0, 255.0), os.path.join(epoch_folder, \
-                                                                            "network_output" + str(num) + ".png"))
+                                                                            "network_output_" + str(num) + ".png"))
 
 
 
