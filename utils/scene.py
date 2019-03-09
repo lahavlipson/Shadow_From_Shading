@@ -68,9 +68,22 @@ class Scene:
             surface_prims += shape.render()
         return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims,name=name)
 
+    def calc_shadow_center(self, include=False):
+        assert len(self.shapes) == 1, "For now, assuming only one shape in scene"
+        x,y,z = (self.light.location - self.shapes[0].center)
+        a,b,c = self.shapes[0].center
+        t = (-40-b)/y
+        pt = a+x*t, b+y*t, c+z*t
+        if include:
+            self.shapes.append(Sphere(pt, 5))
+        return pt
+
 if __name__ == '__main__':
     g = Scene()
     g.add_object()
+    shadow_center = g.calc_shadow_center(True)
+    print(shadow_center)
+
     shadows, noshadows = g.render()
     if not os.path.isdir("tmp_scenes"):
         os.mkdir("tmp_scenes")
