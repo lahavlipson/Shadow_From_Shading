@@ -3,7 +3,7 @@ import cv2 as cv
 import os
 
 
-g = Scene()
+g = Scene(True, 1, 10)
 g.add_object()
 shadows, noshadows = g.render()
 if not os.path.isdir("tmp_scenes"):
