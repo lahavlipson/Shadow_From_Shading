@@ -8,22 +8,51 @@ import numpy as np
 
 class Scene:
 
-    def __init__(self):
+    def __init__(self, gridlines_on=None, gridlines_width=None, gridlines_spacing=None):
+        if gridlines_on or gridlines_width or gridlines_spacing:
+            assert not (gridlines_on is None\
+                or gridlines_width is None\
+                or gridlines_spacing is None),\
+                "All gridlines variables must be set if any are"
+
         self.rend = Renderer()
 
         self.shapes = []
-        
+        self.grid_shapes = []
+
         self.center = (0, 140, 300)
 
         self.background_prims = []
+        background_lower_bound = -1e6
+        background_upper_bound = 1e6
         self.background_prims.append(
-            Tri([(-1e6, 0, 1000), (1e6, 0, 1e6), (-1e6, 0, -1e6)]))
+            Tri([(background_lower_bound, 0, background_upper_bound),
+                (background_upper_bound, 0, background_upper_bound),
+                (background_lower_bound, 0, background_lower_bound)]))
         self.background_prims.append(
-            Tri([(-1e6, 0, -1e6), (1e6, 0, 1e6), (1e6, 0, -1e6)]))
+            Tri([(background_lower_bound, 0, background_lower_bound),
+                (background_upper_bound, 0, background_upper_bound),
+                (background_upper_bound, 0, background_lower_bound)]))
         self.background_prims.append(
-            Tri([(-1e6, -50, 1e6), (0, 1e6, 1e6), (1e6, -50, 1e6)]))
+            Tri([(background_lower_bound, -50, background_upper_bound),
+                (0, background_upper_bound, background_upper_bound),
+                (background_upper_bound, -50, background_upper_bound)]))
 
-
+        if gridlines_on:
+               for i in range(int((background_upper_bound - background_lower_bound) / (gridlines_width + gridlines_spacing))):
+                   offset = i * (gridlines_width + gridlines_spacing)
+                   self.grid_shapes.append(Tri([(background_lower_bound + offset,                   0.01, background_lower_bound),
+                                                (background_lower_bound + offset,                   0.01, background_upper_bound),
+                                                (background_lower_bound + gridlines_width + offset, 0.01, background_lower_bound)]))
+                   self.grid_shapes.append(Tri([(background_lower_bound + offset,                   0.01, background_upper_bound),
+                                                (background_lower_bound + gridlines_width + offset, 0.01, background_upper_bound),
+                                                (background_lower_bound + gridlines_width + offset, 0.01, background_lower_bound)]))
+                   self.grid_shapes.append(Tri([(background_lower_bound, 0.01, background_lower_bound + offset                  ),
+                                                (background_upper_bound, 0.01, background_lower_bound + offset                  ),
+                                                (background_lower_bound, 0.01, background_lower_bound + gridlines_width + offset)]))
+                   self.grid_shapes.append(Tri([(background_upper_bound, 0.01, background_lower_bound + offset                  ),
+                                                (background_upper_bound, 0.01, background_lower_bound + gridlines_width + offset),
+                                                (background_lower_bound, 0.01, background_lower_bound + gridlines_width + offset)]))
 
         self.light = Lit((400, 300, -800), 1000000)
         self.cameras = [Cam((0, 80, 140), (0, -.3, 1), (128, 128))]
@@ -69,6 +98,7 @@ class Scene:
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
+        surface_prims.extend(self.grid_shapes)
         return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims,name=name)
 
 if __name__ == '__main__':
