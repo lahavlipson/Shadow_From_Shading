@@ -41,18 +41,18 @@ class Scene:
         if gridlines_on:
                for i in range(int((background_upper_bound - background_lower_bound) / (gridlines_width + gridlines_spacing))):
                    offset = i * (gridlines_width + gridlines_spacing)
-                   self.grid_shapes.append(Tri([(background_lower_bound + offset,                   0, background_lower_bound),
-                                                (background_lower_bound + offset,                   0, background_upper_bound),
-                                                (background_lower_bound + gridlines_width + offset, 0, background_lower_bound)]))
-                   self.grid_shapes.append(Tri([(background_lower_bound + offset,                   0, background_upper_bound),
-                                                (background_lower_bound + gridlines_width + offset, 0, background_upper_bound),
-                                                (background_lower_bound + gridlines_width + offset, 0, background_lower_bound)]))
-                   self.grid_shapes.append(Tri([(background_lower_bound, 0, background_lower_bound + offset,                   ),
-                                                (background_upper_bound, 0, background_lower_bound + offset,                   ),
-                                                (background_lower_bound, 0, background_lower_bound + gridlines_width + offset, )]))
-                   self.grid_shapes.append(Tri([(background_upper_bound, 0, background_lower_bound + offset,                  ),
-                                                (background_upper_bound, 0, background_lower_bound + gridlines_width + offset,),
-                                                (background_lower_bound, 0, background_lower_bound + gridlines_width + offset,)]))
+                   self.grid_shapes.append(Tri([(background_lower_bound + offset,                   0.01, background_lower_bound),
+                                                (background_lower_bound + offset,                   0.01, background_upper_bound),
+                                                (background_lower_bound + gridlines_width + offset, 0.01, background_lower_bound)]))
+                   self.grid_shapes.append(Tri([(background_lower_bound + offset,                   0.01, background_upper_bound),
+                                                (background_lower_bound + gridlines_width + offset, 0.01, background_upper_bound),
+                                                (background_lower_bound + gridlines_width + offset, 0.01, background_lower_bound)]))
+                   self.grid_shapes.append(Tri([(background_lower_bound, 0.01, background_lower_bound + offset                  ),
+                                                (background_upper_bound, 0.01, background_lower_bound + offset                  ),
+                                                (background_lower_bound, 0.01, background_lower_bound + gridlines_width + offset)]))
+                   self.grid_shapes.append(Tri([(background_upper_bound, 0.01, background_lower_bound + offset                  ),
+                                                (background_upper_bound, 0.01, background_lower_bound + gridlines_width + offset),
+                                                (background_lower_bound, 0.01, background_lower_bound + gridlines_width + offset)]))
 
         self.light = Lit((400, 300, -800), 1000000)
         self.cameras = [Cam((0, 80, 140), (0, -.3, 1), (128, 128))]
