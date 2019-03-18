@@ -40,7 +40,6 @@ class Scene:
                 (wall_bound, -50, wall_bound)]))
 
         if gridlines_on:
-            int((background_upper_bound - background_lower_bound) / (gridlines_width + gridlines_spacing))
             for i in range(int((background_upper_bound - background_lower_bound) / (gridlines_width + gridlines_spacing))):
                 offset = i * (gridlines_width + gridlines_spacing)
                 self.grid_shapes.append(Tri([(background_lower_bound + offset, 0.01, background_lower_bound),
@@ -103,8 +102,7 @@ class Scene:
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
-        print(len(self.grid_shapes))
-        return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims, self.grid_shapes, grid_color=(0.5,0.5,0.5))
+        return self.rend.render(self.cameras, self.light, surface_prims, self.background_prims, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
 if __name__ == '__main__':
     g = Scene(True, gridlines_width=20, gridlines_spacing=30)

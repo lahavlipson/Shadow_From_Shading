@@ -13,7 +13,7 @@ class ShapeDataset(Dataset):
         return self.length
 
     def __getitem__(self, index):
-        sc = Scene()
+        sc = Scene(True, gridlines_width=20, gridlines_spacing=30)
         sc.add_object()
         shadows, noshadows = sc.render()
         shad_tens = torch.Tensor(shadows).permute(2, 0, 1)
