@@ -43,7 +43,7 @@ class Cam:
         
     def __str__(self):
         return "c " + ' '.join(str(e) for e in self.location) + " " + \
-        ' '.join(str(e) for e in self.direction) + " 35.0 35.0 25.0 " + \
+        ' '.join(str(e) for e in self.direction) + " 35.0 35.0 35.0 " + \
         ' '.join(str(e) for e in self.resolution) + " "
         
 class Lit:
@@ -69,9 +69,12 @@ class Mat:
 class Renderer:
 
     def __write_scene(self, camera, light, object_prims,
-                      background_prims, object_color, background_surface_color, ambient_light_intensity):
+                      background_prims, grid_prims, object_color, background_surface_color, grid_color, ambient_light_intensity):
         text_file = (str(Mat(object_color)) + NL)
         for p in object_prims:
+            text_file += (str(p) + NL)
+        text_file += (str(Mat(grid_color)) + NL)
+        for p in grid_prims:
             text_file += (str(p) + NL)
         text_file += (str(Mat(background_surface_color)) + NL)
         for p in background_prims:
@@ -82,13 +85,13 @@ class Renderer:
         return text_file
             
 
-    def render(self, cameras, light, object_prims, background_prims, object_color=(1,0,0), \
-               background_surface_color=(0.9, 0.9, 0.9), ambient_light_intensity=0.2, name="output"):
+    def render(self, cameras, light, object_prims, background_prims, grid_prims=[], object_color=(1,0,0), \
+               background_surface_color=(0.9, 0.9, 0.9), grid_color=(0.3,0.3,0.3), ambient_light_intensity=0.2):
         shadows = []
         noshadows = []
         for camera in cameras:
-            scene_text = self.__write_scene(camera, light, object_prims, background_prims, \
-                                    object_color, background_surface_color, ambient_light_intensity)
+            scene_text = self.__write_scene(camera, light, object_prims, background_prims, grid_prims, \
+                                    object_color, background_surface_color, grid_color, ambient_light_intensity)
             y,x = cameras[0].resolution
             rend_output = renderer_lib.render(scene_text, x, y)
             shadow, noshadow = rend_output.reshape((2, x, y, 3))

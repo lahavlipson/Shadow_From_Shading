@@ -86,7 +86,9 @@ class Experiment:
             ShapeDataset.print_tensor(estimated_shadowed_view.clamp(0.0, 255.0), os.path.join(epoch_folder, \
                                                                             "network_output_" + str(num) + ".png"))
 
-
+            ShapeDataset.print_tensor(
+                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
+                os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
 
 
 if __name__ == '__main__':
