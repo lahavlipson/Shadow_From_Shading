@@ -56,14 +56,14 @@ class Scene:
                                             (background_upper_bound, 0.01, background_lower_bound + gridlines_width + offset)]))
 
         self.light = Lit((400, 300, -800), 1000000)
-        self.camera = Cam((0, 80, 140), (128, 128))
+        self.camera = Cam((0, 140, 300), (128, 128))
 
 
     def add_object(self):
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
         shape.scale(randint(25,40))
         self.__rotate_object(shape)
-        self.__translate_object(shape)
+        # self.__translate_object(shape)
         self.shapes.append(shape)
 
     def crossover(self, scene):
@@ -102,7 +102,9 @@ class Scene:
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
-        views = [self.camera.view_from(0, -.3, 1)]
+            print('center')
+            print(shape.center)
+        views = [self.camera.view_from(-30, 0, 100)]
         res_x, res_y = self.camera.resolution
         return self.rend.render(views, self.light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 

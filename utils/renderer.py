@@ -44,20 +44,18 @@ class Cam:
     def view_from(self, yaw, pitch, distance):
         c = np.cos(np.deg2rad(-pitch))
         s = np.sin(np.deg2rad(-pitch))
-        pitch_matrix = np.array(((c, -s, 0),
-                                 (s,  c, 0),
-                                 (0,  0, 1)))
+        pitch_matrix = np.array(((c, 0, -s),
+                                 (0, 1,  0),
+                                 (s, 0,  c)))
 
         c = np.cos(np.deg2rad(-yaw))
         s = np.sin(np.deg2rad(-yaw))
         yaw_matrix = np.array(((1, 0,  0),
                                (0, c, -s),
                                (0, s,  c)))
-        yaw_matrix = np.array(((1, 0,  0),
-                               (0, 1,  0),
-                               (0, 0,  1)))
-        rotation_matrix = np.dot(yaw_matrix, pitch_matrix)
-        location = np.array((0, 0, distance))
+        # rotation_matrix = np.dot(yaw_matrix, pitch_matrix)
+        print(distance)
+        location = np.array((0, 0, -distance))
         print(location)
         location = np.dot(yaw_matrix, location)
         print(yaw_matrix)
@@ -68,13 +66,13 @@ class Cam:
         final_location = location + self.location
         print(final_location)
 
-        return "c 0 240 300 " + \
-        " %s %s %s 35.0 35.0 35.0 "%(0, -1, 0) + \
-        ' '.join(str(e) for e in self.resolution) + " "
-        # epsilon = 0.000001
-        # return "c " + ' '.join(str(e) for e in final_location) + " " + \
-        # " %s %s %s 35.0 35.0 35.0 "%(-location[0] + epsilon, -location[1] + epsilon, location[2] + epsilon) + \
+        # return "c 0 240 300 " + \
+        # " %s %s %s 35.0 35.0 35.0 "%(0, -1, 0) + \
         # ' '.join(str(e) for e in self.resolution) + " "
+        epsilon = 0.00000
+        return "c " + ' '.join(str(e) for e in final_location) + " " + \
+        " %s %s %s 35.0 35.0 35.0 "%(-location[0] + epsilon, -location[1] + epsilon, -location[2] + epsilon) + \
+        ' '.join(str(e) for e in self.resolution) + " "
 
 class Lit:
     def __init__(self, loc, intens=19000):
