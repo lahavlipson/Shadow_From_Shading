@@ -24,15 +24,27 @@ class Experiment:
         if self.cuda:
             self.network = self.network.cuda()
             self.pixelwise_loss = self.pixelwise_loss.cuda()
+
+        # create result_dir
         self.results_dir = args.res_dir
         if not os.path.isdir(self.results_dir):
             os.mkdir(self.results_dir)
+        # create model_dir
+        self.model_dir = os.path.join(self.results_dir, 'models')
+        if not os.path.exists(self.model_dir):
+            os.mkdir(self.model_dir)
+
+        self.start = 1  # starting epoch
+        if args.net_from_epoch:
+            self.load_model(args.net_from_epoch)
+            self.start = args.net_from_epoch
 
     def run(self):
         self.evaluate(0, 7)
-        for epoch in range(1, self.EPOCHS + 1):
+        for epoch in range(self.start, self.start + self.EPOCHS + 1):
             self.train(epoch)
-            self.evaluate(epoch, 7)
+            self.save_model(epoch)
+            self.evaluate(epoch, 15)
             np.savetxt(os.path.join(self.results_dir, 'total_training_loss.txt'), np.array(self.training_losses))
             self.save_graph()
 
@@ -45,6 +57,18 @@ class Experiment:
         plt.plot(list(range(1, 1 + len(self.training_losses))), self.training_losses, label='Training Loss')
         plt.legend()
         plt.savefig(os.path.join(self.results_dir, 'loss_graph.png'))
+
+    def save_model(self, epoch):
+        new_file = '{}/netG_epoch_{}.pth'.format(self.model_dir, epoch)
+        torch.save(self.network.state_dict(), new_file)
+        old_file = '{}/netG_epoch_{}.pth'.format(self.model_dir, epoch - 2)
+        if os.path.exists(old_file):
+            os.remove(old_file)
+
+    def load_model(self, epoch):
+        self.network.load_state_dict(
+            torch.load('{}/netG_epoch_{}.pth'.format(self.model_dir, epoch), \
+                       map_location='cpu'))
 
     def train(self, epoch):
         print("Training Epoch",epoch)
@@ -81,11 +105,10 @@ class Experiment:
 
             estimated_shadow = self.network(shadowless_view.unsqueeze(0)).squeeze(0)
             estimated_shadowed_view = shadowless_view - estimated_shadow
-            ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input_" + str(num) + ".png"))
-            ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
-            ShapeDataset.print_tensor(estimated_shadowed_view.clamp(0.0, 255.0), os.path.join(epoch_folder, \
-                                                                            "network_output_" + str(num) + ".png"))
-
+            # ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input_" + str(num) + ".png"))
+            # ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
+            # ShapeDataset.print_tensor(estimated_shadowed_view.clamp(0.0, 255.0), os.path.join(epoch_folder, \
+            #                                                                 "network_output_" + str(num) + ".png"))
             ShapeDataset.print_tensor(
                 torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
                 os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
