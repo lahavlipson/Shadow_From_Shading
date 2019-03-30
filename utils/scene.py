@@ -63,6 +63,7 @@ class Scene:
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
         shape.scale(randint(25,40))
         self.__rotate_object(shape)
+        self.__ground_shape(shape)
         self.__translate_object(shape)
         self.shapes.append(shape)
 
@@ -86,14 +87,18 @@ class Scene:
             shape.scale(uniform(0.3, 1.7), axis=i)
 
     def __translate_object(self, shape):
+        shape.translate((randint(-50, 50), 0, randint(-50, 50)))
+
+    def __ground_shape(self, shape):
         lowest_y = 1e6
         if type(shape) == Sphere:
             lowest_y = shape.center[1] - shape.radius
         else:
             for tri in shape.render():
                 for tup in tri.data:
-                    lowest_y = min(lowest_y,tup[1])
+                    lowest_y = min(lowest_y, tup[1])
         shape.translate((0, -lowest_y, 0))
+
 
     def __rotate_object(self, shape):
         shape.rotate(randint(0, 359), randint(0, 359))
