@@ -44,21 +44,24 @@ class Cam:
     def view_from(self, yaw, pitch, distance):
         c = np.cos(np.deg2rad(-pitch))
         s = np.sin(np.deg2rad(-pitch))
-        pitch_matrix = np.array(((c, -s, 0),
-                                 (s,  c, 0),
-                                 (0,  0, 1)))
+        pitch_matrix = np.array(((c, 0, -s),
+                                 (0, 1,  0),
+                                 (s, 0,  c)))
 
         c = np.cos(np.deg2rad(-yaw))
         s = np.sin(np.deg2rad(-yaw))
         yaw_matrix = np.array(((1, 0,  0),
                                (0, c, -s),
                                (0, s,  c)))
-        rotation_matrix = np.dot(pitch_matrix, yaw_matrix)
-        default_location = np.array((distance, 0, 0))
-        final_location = np.dot(default_location, rotation_matrix) + self.location
+        location = np.array((0, 0, -distance))
+        location = np.dot(yaw_matrix, location)
+        location = np.dot(pitch_matrix, location)
+        final_location = location + self.location
 
+        # Can be set to small value if we start getting divide by 0 errors
+        epsilon = 0.00000
         return "c " + ' '.join(str(e) for e in final_location) + " " + \
-        " %s %s %s 35.0 35.0 35.0 "%(yaw, pitch, distance) + \
+        " %s %s %s 35.0 35.0 35.0 "%(-location[0] + epsilon, -location[1] + epsilon, -location[2] + epsilon) + \
         ' '.join(str(e) for e in self.resolution) + " "
 
 class Lit:
