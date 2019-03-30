@@ -53,22 +53,12 @@ class Cam:
         yaw_matrix = np.array(((1, 0,  0),
                                (0, c, -s),
                                (0, s,  c)))
-        # rotation_matrix = np.dot(yaw_matrix, pitch_matrix)
-        print(distance)
         location = np.array((0, 0, -distance))
-        print(location)
         location = np.dot(yaw_matrix, location)
-        print(yaw_matrix)
-        print(location)
         location = np.dot(pitch_matrix, location)
-        print(pitch_matrix)
-        print(location)
         final_location = location + self.location
-        print(final_location)
 
-        # return "c 0 240 300 " + \
-        # " %s %s %s 35.0 35.0 35.0 "%(0, -1, 0) + \
-        # ' '.join(str(e) for e in self.resolution) + " "
+        # Can be set to small value if we start getting divide by 0 errors
         epsilon = 0.00000
         return "c " + ' '.join(str(e) for e in final_location) + " " + \
         " %s %s %s 35.0 35.0 35.0 "%(-location[0] + epsilon, -location[1] + epsilon, -location[2] + epsilon) + \
