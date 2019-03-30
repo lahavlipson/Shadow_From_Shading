@@ -1,5 +1,6 @@
 from utils.shapes import Sphere, Cuboid, Tetrahedron
 from utils.renderer import Renderer, Tri, Lit, Cam
+from utils.helpers import mean
 from random import randint, uniform, shuffle
 import cv2
 import os
@@ -56,14 +57,16 @@ class Scene:
                                             (background_upper_bound, 0.01, background_lower_bound + gridlines_width + offset)]))
 
         self.light = Lit((400, 300, -800), 1000000)
-        self.camera = Cam((0, 80, 140), (128, 128))
+        self.camera = Cam((0, 80, 140), (528, 528))
 
+
+    def calc_center(self):
+        return mean([shape.center for shape in self.shapes])
 
     def add_object(self):
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
         shape.scale(randint(25,40))
         self.__rotate_object(shape)
-        self.__ground_shape(shape)
         self.__translate_object(shape)
         self.shapes.append(shape)
 
@@ -84,20 +87,21 @@ class Scene:
 
     def __scale_object(self, shape):
         for i in range(3):
-            shape.scale(uniform(0.3, 1.7), axis=i)
+            shape.scale(uniform(0.8, 1.2), axis=i)
 
     def __translate_object(self, shape):
         shape.translate((randint(-50, 50), 0, randint(-50, 50)))
 
-    def __ground_shape(self, shape):
-        lowest_y = 1e6
-        if type(shape) == Sphere:
-            lowest_y = shape.center[1] - shape.radius
-        else:
-            for tri in shape.render():
-                for tup in tri.data:
-                    lowest_y = min(lowest_y, tup[1])
-        shape.translate((0, -lowest_y, 0))
+    def ground_mesh(self):
+        for shape in self.shapes:
+            lowest_y = 1e6
+            if type(shape) == Sphere:
+                lowest_y = shape.center[1] - shape.radius
+            else:
+                for tri in shape.render():
+                    for tup in tri.data:
+                        lowest_y = min(lowest_y, tup[1])
+            shape.translate((0, -lowest_y, 0))
 
 
     def __rotate_object(self, shape):
@@ -114,6 +118,9 @@ class Scene:
 if __name__ == '__main__':
     g = Scene(True, gridlines_width=20, gridlines_spacing=30)
     g.add_object()
+    g.add_object()
+    g.ground_mesh()
+    g.calc_center()
     shadows, noshadows = g.render()
     # shadows = cv2.cvtColor(shadows.astype(np.uint8), cv2.COLOR_BGR2GRAY)
     # noshadows = cv2.cvtColor(noshadows.astype(np.uint8), cv2.COLOR_BGR2GRAY)
