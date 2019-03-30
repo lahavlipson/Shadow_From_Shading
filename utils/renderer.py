@@ -53,13 +53,28 @@ class Cam:
         yaw_matrix = np.array(((1, 0,  0),
                                (0, c, -s),
                                (0, s,  c)))
-        rotation_matrix = np.dot(pitch_matrix, yaw_matrix)
-        default_location = np.array((distance, 0, 0))
-        final_location = np.dot(default_location, rotation_matrix) + self.location
+        yaw_matrix = np.array(((1, 0,  0),
+                               (0, 1,  0),
+                               (0, 0,  1)))
+        rotation_matrix = np.dot(yaw_matrix, pitch_matrix)
+        location = np.array((0, 0, distance))
+        print(location)
+        location = np.dot(yaw_matrix, location)
+        print(yaw_matrix)
+        print(location)
+        location = np.dot(pitch_matrix, location)
+        print(pitch_matrix)
+        print(location)
+        final_location = location + self.location
+        print(final_location)
 
-        return "c " + ' '.join(str(e) for e in final_location) + " " + \
-        " %s %s %s 35.0 35.0 35.0 "%(yaw, pitch, distance) + \
+        return "c 0 240 300 " + \
+        " %s %s %s 35.0 35.0 35.0 "%(0, -1, 0) + \
         ' '.join(str(e) for e in self.resolution) + " "
+        # epsilon = 0.000001
+        # return "c " + ' '.join(str(e) for e in final_location) + " " + \
+        # " %s %s %s 35.0 35.0 35.0 "%(-location[0] + epsilon, -location[1] + epsilon, location[2] + epsilon) + \
+        # ' '.join(str(e) for e in self.resolution) + " "
 
 class Lit:
     def __init__(self, loc, intens=19000):
