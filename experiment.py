@@ -7,7 +7,7 @@ from networks.shadow_dist_net import ShadowDistNet
 from utils.helpers import define_parser, mean
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
-from torch.distributions.multivariate_normal import MultivariateNormal
+
 
 class Experiment:
 
@@ -18,7 +18,7 @@ class Experiment:
                                                         batch_size=args.batch_size, shuffle=True,
                                                         num_workers=args.workers)
         self.network = ShadowNet()
-        self.dist_net = ShadowDistNet(13)
+        self.dist_net = ShadowDistNet(5, 4)
         self.training_losses = []
         self.EPOCHS = args.niter
         self.cuda = args.cuda
@@ -91,11 +91,7 @@ class Experiment:
             training_loss.backward()
             self.optimizer.step()
 
-            #TESTING DISTRIBUTION
-            means, cov = self.dist_net(shadowless_views)
-            distrib = MultivariateNormal(loc=abs(means), covariance_matrix=abs(cov))
-            a = distrib.rsample()
-            print(a[0])
+            x = self.dist_net(shadowless_views)
 
         self.training_losses.append(mean(running_loss))
 
