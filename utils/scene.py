@@ -1,5 +1,6 @@
 from utils.shapes import Sphere, Cuboid, Tetrahedron
 from utils.renderer import Renderer, Tri, Lit, Cam
+from utils.helpers import mean
 from random import randint, uniform, shuffle
 import cv2
 import os
@@ -59,11 +60,14 @@ class Scene:
         self.camera = Cam((0, 140, 300), (128, 128))
 
 
+    def calc_center(self):
+        return mean([shape.center for shape in self.shapes])
+
     def add_object(self):
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
         shape.scale(randint(25,40))
         self.__rotate_object(shape)
-        # self.__translate_object(shape)
+        self.__translate_object(shape)
         self.shapes.append(shape)
 
     def crossover(self, scene):
@@ -83,32 +87,40 @@ class Scene:
 
     def __scale_object(self, shape):
         for i in range(3):
-            shape.scale(uniform(0.3, 1.7), axis=i)
+            shape.scale(uniform(0.8, 1.2), axis=i)
 
     def __translate_object(self, shape):
-        lowest_y = 1e6
-        if type(shape) == Sphere:
-            lowest_y = shape.center[1] - shape.radius
-        else:
-            for tri in shape.render():
-                for tup in tri.data:
-                    lowest_y = min(lowest_y,tup[1])
-        shape.translate((0, -lowest_y, 0))
+        shape.translate((randint(-50, 50), 0, randint(-50, 50)))
+
+    def ground_mesh(self):
+        for shape in self.shapes:
+            lowest_y = 1e6
+            if type(shape) == Sphere:
+                lowest_y = shape.center[1] - shape.radius
+            else:
+                for tri in shape.render():
+                    for tup in tri.data:
+                        lowest_y = min(lowest_y, tup[1])
+            shape.translate((0, -lowest_y, 0))
+
 
     def __rotate_object(self, shape):
         shape.rotate(randint(0, 359), randint(0, 359))
 
     def render(self):
+        self.camera.location = self.calc_center()
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
-        views = [self.camera.view_from(-30, 0, 100)]
+        views = [self.camera.view_from(-30, 0, 200)]
         res_x, res_y = self.camera.resolution
         return self.rend.render(views, self.light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
 if __name__ == '__main__':
     g = Scene(True, gridlines_width=20, gridlines_spacing=30)
     g.add_object()
+    g.add_object()
+    g.ground_mesh()
     shadows, noshadows = g.render()
     # shadows = cv2.cvtColor(shadows.astype(np.uint8), cv2.COLOR_BGR2GRAY)
     # noshadows = cv2.cvtColor(noshadows.astype(np.uint8), cv2.COLOR_BGR2GRAY)

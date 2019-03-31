@@ -14,7 +14,9 @@ class ShapeDataset(Dataset):
 
     def __getitem__(self, index):
         sc = Scene(True, gridlines_width=20, gridlines_spacing=30)
-        sc.add_object()
+        for _ in range(4):
+            sc.add_object()
+        sc.ground_mesh()
         shadows, noshadows = sc.render()
         shad_tens = torch.Tensor(shadows).permute(2, 0, 1)
         noshad_tens = torch.Tensor(noshadows).permute(2, 0, 1)

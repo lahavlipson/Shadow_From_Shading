@@ -24,6 +24,8 @@ def define_parser():
         '--lr', help='learning rate for the optimizer', default=0.001, type=float)
     parser.add_argument(
         '--cuda', action='store_true', help='whether to use GPU')
+    parser.add_argument(
+        '--net_from_epoch', help='model from which epoch to load (to continue training)', type=int)
     return parser
 
 
