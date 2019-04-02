@@ -73,10 +73,12 @@ class Experiment:
     def train(self, epoch):
         print("Training Epoch",epoch)
 
-        if self.training_losses[-1] < 500:
+        if len(self.training_losses) > 0 and self.training_losses[-1] < 500:
             if self.dataset.focus:
+                print("STOPPING FOCUS")
                 self.dataset.focus = False
             else:
+                print("INCREASING NUM SHAPES TO", 1 + self.dataset.number_of_shapes)
                 self.dataset.number_of_shapes += 1
 
         self.network.train()

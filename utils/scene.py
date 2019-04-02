@@ -122,7 +122,7 @@ class Scene:
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
-        views = [self.camera.view_from(-30, 0, 200)]
+        views = [self.camera.view_from(-30, 0, 150)]
         res_x, res_y = self.camera.resolution
         return self.rend.render(views, self.light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
