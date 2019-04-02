@@ -65,10 +65,18 @@ class Scene:
 
     def add_object(self):
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center)][randint(0,2)]
-        shape.scale(randint(25,40))
+        self.shapes.append(shape)
+
+    def mutate_object(self, shape):
+        shape.scale(randint(25, 40))
         self.__rotate_object(shape)
         self.__translate_object(shape)
-        self.shapes.append(shape)
+
+    def mutate_all_objects(self):
+        for shape in self.shapes:
+            shape.scale(randint(25, 40))
+            self.__rotate_object(shape)
+            self.__translate_object(shape)
 
     def crossover(self, scene):
         offspring = Scene()
@@ -107,8 +115,10 @@ class Scene:
     def __rotate_object(self, shape):
         shape.rotate(randint(0, 359), randint(0, 359))
 
-    def render(self):
+    def refocus_camera(self):
         self.camera.location = self.calc_center()
+
+    def render(self):
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
