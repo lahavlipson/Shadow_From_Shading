@@ -40,7 +40,7 @@ class Experiment:
             self.start = args.net_from_epoch
 
     def run(self):
-        self.evaluate(0, 7)
+        self.evaluate(0, 15)
         for epoch in range(self.start, self.start + self.EPOCHS + 1):
             self.train(epoch)
             self.save_model(epoch)
@@ -72,6 +72,13 @@ class Experiment:
 
     def train(self, epoch):
         print("Training Epoch",epoch)
+
+        if self.training_losses[-1] < 500:
+            if self.dataset.focus:
+                self.dataset.focus = False
+            else:
+                self.dataset.number_of_shapes += 1
+
         self.network.train()
         running_loss = []
         for i, (shadowless_views, shadowed_views) in enumerate(self.dataloader):
