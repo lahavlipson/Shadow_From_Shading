@@ -86,6 +86,7 @@ class Torus(Shape):
 
         sphere_centers = np.array(sphere_centers)
         sphere_centers *= self.radius
+        sphere_centers = np.dot(sphere_centers, self.rotation_matrix)
 
         offset = np.tile(self.center, (self.num_spheres, 1))
         sphere_centers += offset
