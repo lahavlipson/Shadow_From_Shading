@@ -12,7 +12,7 @@ class Shape:
     def translate(self, offset):
         self.center = self.center + offset
 
-    def rotate(self, pitch, yaw):
+    def rotate(self, pitch, yaw, roll):
         c = np.cos(np.deg2rad(pitch))
         s = np.sin(np.deg2rad(pitch))
         pitch_matrix = np.array(((c, -s, 0),
@@ -26,6 +26,13 @@ class Shape:
                                (0, c, -s),
                                (0, s,  c)))
         self.rotation_matrix = np.dot(yaw_matrix, self.rotation_matrix)
+
+        c = np.cos(np.deg2rad(roll))
+        s = np.sin(np.deg2rad(roll))
+        roll_matrix = np.array(((c, 0, -s),
+                                (0, 1,  0),
+                                (s, 0,  c)))
+        self.rotation_matrix = np.dot(roll_matrix, self.rotation_matrix)
 
     def scale(self, factor, axis=None):
         if axis is None:
