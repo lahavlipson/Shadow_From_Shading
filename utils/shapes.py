@@ -42,6 +42,16 @@ class Shape:
         assert axis >= 0 and axis < 3
         self.scale_matrix[axis] = self.scale_matrix[axis] * factor
 
+    def lowest_y(self):
+        dimensions = self.triangle_faces.shape
+        modified = self.triangle_faces.reshape(dimensions[0] * dimensions[1], 3)
+        modified = np.dot(modified, self.scale_matrix)
+        modified = np.dot(modified, self.rotation_matrix)
+        modified = modified.reshape(dimensions[0], dimensions[1], 3)
+        offset = np.tile(self.center, (dimensions[0], dimensions[1], 1))
+        modified += offset
+        return np.min(modified[:, :, 1])
+
     def render(self):
         dimensions = self.triangle_faces.shape
         modified = self.triangle_faces.reshape(dimensions[0] * dimensions[1], 3)
@@ -68,6 +78,9 @@ class Sphere(Shape):
         # Returns a list for sake of consistency with other render methods
         return [Cir((self.center, self.radius))]
 
+    def lowest_y(self):
+        return self.center[1] - self.radius
+
     def __str__(self):
         return "Sphere"
 
@@ -82,6 +95,23 @@ class Torus(Shape):
         if axis == 0 or axis is None:
             self.radius *= factor
             self.wall_diameter *= factor
+
+    def lowest_y(self):
+        sphere_centers = []
+        inter_sphere_angle = 2 * pi / self.num_spheres
+
+        for i in range(self.num_spheres):
+            theta = i * inter_sphere_angle
+            sphere_centers.append((np.sin(theta), np.cos(theta), 0))
+
+        sphere_centers = np.array(sphere_centers)
+        sphere_centers *= self.radius
+        sphere_centers = np.dot(sphere_centers, self.rotation_matrix)
+
+        offset = np.tile(self.center, (self.num_spheres, 1))
+        sphere_centers += offset
+
+        return np.min(sphere_centers[:, 1]) - self.wall_radius
 
     def render(self):
         sphere_centers = []
