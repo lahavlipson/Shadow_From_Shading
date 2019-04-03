@@ -84,8 +84,12 @@ class Torus(Shape):
             theta = i * inter_sphere_angle
             sphere_centers.append((np.sin(theta), np.cos(theta), 0))
 
-        print(sphere_centers)
-        return []
+        sphere_centers = np.array(sphere_centers)
+        sphere_centers *= self.radius
+
+        offset = np.tile(self.center, (self.num_spheres, 1))
+        sphere_centers += offset
+        return [Cir((x, self.wall_radius)) for x in sphere_centers]
 
 
 class Cuboid(Shape):
