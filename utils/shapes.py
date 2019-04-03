@@ -1,7 +1,7 @@
 from utils.renderer import Cir, Tri
 import numpy as np
 from random import randint, uniform, shuffle
-from math import sqrt
+from math import sqrt, pi
 
 
 class Shape:
@@ -63,6 +63,35 @@ class Sphere(Shape):
 
     def __str__(self):
         return "Sphere"
+
+class Torus(Shape):
+    def __init__(self, center, radius, num_spheres, wall_radius):
+        super().__init__(center)
+        self.radius = radius
+        self.wall_radius = wall_radius
+        self.num_spheres = num_spheres
+
+    def scale(self, factor, axis=None):
+        if axis == 0 or axis is None:
+            self.radius *= factor
+            self.wall_diameter *= factor
+
+    def render(self):
+        sphere_centers = []
+        inter_sphere_angle = 2 * pi / self.num_spheres
+
+        for i in range(self.num_spheres):
+            theta = i * inter_sphere_angle
+            sphere_centers.append((np.sin(theta), np.cos(theta), 0))
+
+        sphere_centers = np.array(sphere_centers)
+        sphere_centers *= self.radius
+        sphere_centers = np.dot(sphere_centers, self.rotation_matrix)
+
+        offset = np.tile(self.center, (self.num_spheres, 1))
+        sphere_centers += offset
+        return [Cir((x, self.wall_radius)) for x in sphere_centers]
+
 
 class Cuboid(Shape):
     def __init__(self, center):
