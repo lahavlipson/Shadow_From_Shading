@@ -67,7 +67,7 @@ class Sphere(Shape):
         super().__init__(center)
         self.radius = radius
 
-    def rotate(self, pitch, yaw):
+    def rotate(self, pitch, yaw, roll):
         pass
 
     def scale(self, factor, axis=None):
@@ -94,7 +94,7 @@ class Torus(Shape):
     def scale(self, factor, axis=None):
         if axis == 0 or axis is None:
             self.radius *= factor
-            self.wall_diameter *= factor
+            self.wall_radius *= factor
 
     def lowest_y(self):
         sphere_centers = []

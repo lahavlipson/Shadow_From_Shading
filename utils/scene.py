@@ -64,7 +64,7 @@ class Scene:
         return mean([shape.center for shape in self.shapes])
 
     def add_object(self):
-        shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 1, 20, 0.5)][randint(0,3)]
+        shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 0.5, 50, 0.2)][randint(0,3)]
         self.shapes.append(shape)
 
     def mutate_object(self, shape):
@@ -102,13 +102,7 @@ class Scene:
 
     def ground_mesh(self):
         for shape in self.shapes:
-            lowest_y = 1e6
-            if type(shape) == Sphere:
-                lowest_y = shape.center[1] - shape.radius
-            else:
-                for tri in shape.render():
-                    for tup in tri.data:
-                        lowest_y = min(lowest_y, tup[1])
+            lowest_y = shape.lowest_y()
             shape.translate((0, -lowest_y, 0))
 
 
@@ -122,7 +116,7 @@ class Scene:
         surface_prims = []
         for shape in self.shapes:
             surface_prims += shape.render()
-        views = [self.camera.view_from(-30, 0, 5)]
+        views = [self.camera.view_from(-30, 0, 200)]
         res_x, res_y = self.camera.resolution
         return self.rend.render(views, self.light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
