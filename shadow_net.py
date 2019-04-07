@@ -8,7 +8,6 @@ class ShadowNet(nn.Module):
         super(ShadowNet, self).__init__()
 
         self.relu = nn.ReLU()
-        self.sigmoid = nn.Sigmoid()
 
         self.conv1 = nn.Conv2d(3, 12, 5, padding=2)
         self.bn1 = nn.BatchNorm2d(12)
@@ -35,7 +34,6 @@ class ShadowNet(nn.Module):
         self.bn8 = nn.BatchNorm2d(12)
 
         self.conv9 = nn.Conv2d(12, 1, 5, padding=2)
-        self.bn9 = nn.BatchNorm2d(1)
 
 
     def forward(self, x):
@@ -48,5 +46,5 @@ class ShadowNet(nn.Module):
         x = self.relu(self.bn6(self.conv6(x)))
         x = self.relu(self.bn7(self.conv7(x)))
         x = self.relu(self.bn8(self.conv8(x)))
-        x = self.sigmoid(self.bn9(self.conv9(x)))
-        return (x*255).expand(-1,3,-1,-1)
+        x = self.conv9(x)
+        return x.expand(-1,3,-1,-1)
