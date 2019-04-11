@@ -40,7 +40,7 @@ class Experiment:
             self.start = args.net_from_epoch
 
         # number of epochs since curriculum update
-        self.epochs_since_increase = 0
+        self.epochs_since_increase = 10
 
     def run(self):
         self.evaluate(0, 15)
@@ -94,11 +94,11 @@ class Experiment:
 
         self.training_losses.append(mean(running_loss))
 
-        if len(self.training_losses) > 10:
+        if len(self.training_losses) >= 10:
             recent_growth = mean(diffs(self.training_losses[-10:]))
             print("Recent Growth:", recent_growth)
 
-            if self.epochs_since_increase > 5 and abs(recent_growth) < 1:
+            if self.epochs_since_increase >= 5 and 0 < recent_growth < 1:
                 self.epochs_since_increase = 0
                 if self.dataset.focus:
                     print("STOPPING FOCUS")
