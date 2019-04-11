@@ -74,7 +74,8 @@ class Scene:
 
     def mutate_all_objects(self):
         for shape in self.shapes:
-            shape.scale(randint(25, 40))
+            shape.scale(35)
+            self.__scale_object(shape)
             self.__rotate_object(shape)
             self.__translate_object(shape)
 
