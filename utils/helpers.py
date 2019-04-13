@@ -2,6 +2,7 @@
 
 import argparse
 import random
+import numpy as np
 
 ###
 # Experiment configuration parser.
@@ -31,3 +32,7 @@ def define_parser():
 
 def mean(l):
     return sum(l)/len(l)
+
+def diffs(l):
+    a = np.array(l)
+    return a[1:] - a[:-1]
