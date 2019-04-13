@@ -25,7 +25,7 @@ class Experiment:
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=args.lr)
         if self.cuda:
             self.network = self.network.cuda()
-            self.pixelwise_loss = self.pixelwise_loss.cuda()
+            #self.pixelwise_loss = self.pixelwise_loss.cuda()
 
         # create result_dir
         self.results_dir = args.res_dir
@@ -100,7 +100,7 @@ class Experiment:
             recent_growth = mean(diffs(self.training_losses[-10:]))
             print("Recent Growth:", recent_growth)
 
-            if self.epochs_since_increase >= 5 and 0 < recent_growth < 1:
+            if self.epochs_since_increase >= 10 and 0 < recent_growth < 1:
                 self.epochs_since_increase = 0
                 if self.dataset.focus:
                     print("STOPPING FOCUS")
@@ -127,16 +127,13 @@ class Experiment:
                 shadowed_view = shadowed_view.cuda()
 
             estimated_shadow = self.network(shadowless_view.unsqueeze(0))
-            estimated_shadow[:,1,:,:] = 100
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
-            # ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input_" + str(num) + ".png"))
-            # ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
-            # ShapeDataset.print_tensor(estimated_shadowed_view.clamp(0.0, 255.0), os.path.join(epoch_folder, \
-            #                                                                 "network_output_" + str(num) + ".png"))
             ShapeDataset.print_tensor(
                 torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
                 os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
+
+            #torch.save(estimated_shadowed_view, os.path.join(epoch_folder, "estimate_" + str(num) + ".pt"))
 
 
 if __name__ == '__main__':
