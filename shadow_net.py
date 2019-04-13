@@ -33,7 +33,7 @@ class ShadowNet(nn.Module):
         self.conv8 = nn.Conv2d(16, 12, 7, padding=3)
         self.bn8 = nn.BatchNorm2d(12)
 
-        self.conv9 = nn.Conv2d(12, 1, 5, padding=2)
+        self.conv9 = nn.Conv2d(12, 2, 5, padding=2)
 
 
     def forward(self, x):
@@ -47,4 +47,4 @@ class ShadowNet(nn.Module):
         x = self.relu(self.bn7(self.conv7(x)))
         x = self.relu(self.bn8(self.conv8(x)))
         x = self.conv9(x)
-        return x.expand(-1,3,-1,-1)
+        return x

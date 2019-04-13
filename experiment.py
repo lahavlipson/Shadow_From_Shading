@@ -3,9 +3,10 @@ import torch.utils.data
 import os
 import numpy as np
 from utils.helpers import define_parser, mean, diffs
-from shadow_vae import ShadowVAE as ShadowNet
+from shadow_net import ShadowNet
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
+from utils.loss_function import shadow_loss, binary_shadow_to_image
 from utils.vae_loss import loss_function
 
 class Experiment:
@@ -20,7 +21,7 @@ class Experiment:
         self.training_losses = []
         self.EPOCHS = args.niter
         self.cuda = args.cuda
-        self.pixelwise_loss = loss_function
+        self.pixelwise_loss = shadow_loss
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=args.lr)
         if self.cuda:
             self.network = self.network.cuda()
@@ -85,9 +86,9 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadows, mu, logvar = self.network(shadowless_views)
-            estimated_shadowed_views = shadowless_views - estimated_shadows
-            training_loss = self.pixelwise_loss(estimated_shadowed_views, shadowed_views, mu, logvar)
+            estimated_shadows = self.network(shadowless_views)
+            assert estimated_shadows.shape[1] == 2, estimated_shadows.shape
+            training_loss = self.pixelwise_loss(shadowless_views, estimated_shadows, shadowed_views)
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
             training_loss.backward()
@@ -125,9 +126,10 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
-            estimated_shadow, _, _ = self.network(shadowless_view.unsqueeze(0))
-            estimated_shadow = estimated_shadow.squeeze(0)
-            estimated_shadowed_view = shadowless_view - estimated_shadow
+            estimated_shadow = self.network(shadowless_view.unsqueeze(0))
+            estimated_shadow[:,1,:,:] = 100
+            estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
+
             # ShapeDataset.print_tensor(shadowless_view, os.path.join(epoch_folder, "network_input_" + str(num) + ".png"))
             # ShapeDataset.print_tensor(shadowed_view, os.path.join(epoch_folder,"ground_truth_" + str(num) + ".png"))
             # ShapeDataset.print_tensor(estimated_shadowed_view.clamp(0.0, 255.0), os.path.join(epoch_folder, \
