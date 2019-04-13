@@ -3,7 +3,7 @@ import torch.utils.data
 import os
 import numpy as np
 from shadow_net import ShadowNet
-from utils.helpers import define_parser, mean
+from utils.helpers import define_parser, mean, diffs
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
 
@@ -39,6 +39,9 @@ class Experiment:
             self.load_model(args.net_from_epoch)
             self.start = args.net_from_epoch
 
+        # number of epochs since curriculum update
+        self.epochs_since_increase = 10
+
     def run(self):
         self.evaluate(0, 15)
         for epoch in range(self.start, self.start + self.EPOCHS + 1):
@@ -73,14 +76,6 @@ class Experiment:
     def train(self, epoch):
         print("Training Epoch",epoch)
 
-        if len(self.training_losses) > 0 and self.training_losses[-1] < 500:
-            if self.dataset.focus:
-                print("STOPPING FOCUS")
-                self.dataset.focus = False
-            else:
-                print("INCREASING NUM SHAPES TO", 1 + self.dataset.number_of_shapes)
-                self.dataset.number_of_shapes += 1
-
         self.network.train()
         running_loss = []
         for i, (shadowless_views, shadowed_views) in enumerate(self.dataloader):
@@ -98,6 +93,23 @@ class Experiment:
             self.optimizer.step()
 
         self.training_losses.append(mean(running_loss))
+
+        if len(self.training_losses) >= 10:
+            recent_growth = mean(diffs(self.training_losses[-10:]))
+            print("Recent Growth:", recent_growth)
+
+            if self.epochs_since_increase >= 5 and 0 < recent_growth < 1:
+                self.epochs_since_increase = 0
+                if self.dataset.focus:
+                    print("STOPPING FOCUS")
+                    self.dataset.focus = False
+                else:
+                    print("INCREASING NUM SHAPES TO", 1 + self.dataset.number_of_shapes)
+                    self.dataset.number_of_shapes += 1
+            else:
+                self.epochs_since_increase += 1
+
+
 
 
     def evaluate(self, epoch, num_samples):
