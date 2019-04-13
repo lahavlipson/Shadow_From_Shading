@@ -40,6 +40,7 @@ class Experiment:
         if args.net_from_epoch:
             self.load_model(args.net_from_epoch)
             self.start = args.net_from_epoch
+            self.training_losses = list(np.loadtxt(os.path.join(self.results_dir, 'total_training_loss.txt')))
 
         # number of epochs since curriculum update
         self.epochs_since_increase = 10
