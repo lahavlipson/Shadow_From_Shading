@@ -1,6 +1,7 @@
 from torch import nn
 import torch
 from torch.nn import functional as F
+from torchvision import models
 
 class ShadowNet(nn.Module):
 
@@ -9,7 +10,16 @@ class ShadowNet(nn.Module):
 
         self.relu = nn.ReLU()
 
-        self.conv1 = nn.Conv2d(3, 12, 5, padding=2)
+        self.backbone = models.vgg16()
+
+        for param in self.backbone.parameters():
+            param.requires_grad = False
+
+        self.converter = nn.Linear(1000, 900)
+        self.upsample_1 = nn.ConvTranspose2d(1, 3, 4, stride=2)
+        self.upsample_2 = nn.ConvTranspose2d(3, 3, 2, stride=2)
+
+        self.conv1 = nn.Conv2d(3, 12, 5, padding=4)
         self.bn1 = nn.BatchNorm2d(12)
 
         self.conv2 = nn.Conv2d(12, 16, 7, padding=3)
@@ -37,7 +47,11 @@ class ShadowNet(nn.Module):
 
 
     def forward(self, x):
-
+        x = self.backbone(x)
+        x = self.converter(x)
+        x = x.view(x.shape[0], 1, 30, 30)
+        x = self.upsample_1(x)
+        x = self.upsample_2(x)
         x = self.relu(self.bn1(self.conv1(x)))
         x = self.relu(self.bn2(self.conv2(x)))
         x = self.relu(self.bn3(self.conv3(x)))
