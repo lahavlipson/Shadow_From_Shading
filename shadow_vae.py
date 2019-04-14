@@ -50,7 +50,7 @@ class ShadowVAE(nn.Module):
             nn.Conv2d(16, 12, 9, padding=4),
             nn.BatchNorm2d(12),
             nn.ReLU(),
-            nn.Conv2d(12, 1, 7, padding=3)
+            nn.Conv2d(12, 2, 7, padding=3)
         )
 
     def reparameterize(self, mu, logvar):

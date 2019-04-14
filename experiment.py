@@ -3,11 +3,12 @@ import torch.utils.data
 import os
 import numpy as np
 from utils.helpers import define_parser, mean, diffs
-from shadow_net import ShadowNet
+from shadow_vae import ShadowVAE
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
-from utils.loss_function import shadow_loss, binary_shadow_to_image
+from utils.loss_function import shadow_loss, binary_shadow_to_image, binary_shadow, kl_divergence
 from utils.vae_loss import loss_function
+import torch.nn.functional as F
 
 class Experiment:
 
@@ -17,7 +18,7 @@ class Experiment:
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
                                                         batch_size=args.batch_size, shuffle=True,
                                                         num_workers=args.workers)
-        self.network = ShadowNet()
+        self.network = ShadowVAE()
         self.training_losses = []
         self.EPOCHS = args.niter
         self.cuda = args.cuda
@@ -87,9 +88,15 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadows = self.network(shadowless_views)
+            estimated_shadows, mu, logvar = self.network(shadowless_views)
             assert estimated_shadows.shape[1] == 2, estimated_shadows.shape
-            training_loss = self.pixelwise_loss(shadowless_views, estimated_shadows, shadowed_views)
+            threshold = 0.1
+            true_binary = binary_shadow(shadowless_views, shadowed_views, threshold)
+            pixel_loss = self.pixelwise_loss(true_binary, estimated_shadows)
+            true_binary = true_binary.float()
+            kld = kl_divergence(estimated_shadows, true_binary)
+            print(kld)
+            training_loss = pixel_loss + kld
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
             training_loss.backward()
@@ -127,7 +134,7 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
-            estimated_shadow = self.network(shadowless_view.unsqueeze(0))
+            estimated_shadow, mu, logvar = self.network(shadowless_view.unsqueeze(0))
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
             ShapeDataset.print_tensor(
