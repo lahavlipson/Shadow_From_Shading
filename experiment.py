@@ -88,7 +88,7 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadows, mu, logvar = self.network(shadowless_views)
+            estimated_shadows = self.network(shadowless_views)
             assert estimated_shadows.shape[1] == 2, estimated_shadows.shape
             threshold = 0.1
             true_binary = binary_shadow(shadowless_views, shadowed_views, threshold)
@@ -134,7 +134,7 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
-            estimated_shadow, mu, logvar = self.network(shadowless_view.unsqueeze(0))
+            estimated_shadow = self.network(shadowless_view.unsqueeze(0))
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
             ShapeDataset.print_tensor(

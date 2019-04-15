@@ -15,8 +15,6 @@ def kl_divergence(binary_estimated_shadow, binary_true_shadow):
     binary_true_shadow = torch.unsqueeze(binary_true_shadow, 1)
     inverse_shadow = 1 - binary_true_shadow
     combined = torch.cat((inverse_shadow, binary_true_shadow), dim=1)
-    print(combined.shape)
-    print(binary_estimated_shadow.shape)
     return torch.nn.KLDivLoss()(binary_estimated_shadow, combined)
 
 def binary_shadow_to_image(shadowless, binary_estimated_shadow):
