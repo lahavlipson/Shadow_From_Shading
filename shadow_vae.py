@@ -55,8 +55,9 @@ class ShadowVAE(nn.Module):
 
     def reparameterize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
-        # return torch.normal(mu, std)
         esp = torch.randn(*mu.size())
+        if torch.cuda.is_available():
+            esp = esp.cuda()
         z = mu + std * esp
         return z
 
