@@ -64,13 +64,13 @@ class ShadowVAE(nn.Module):
     def bottleneck(self, h):
         mu, logvar = self.fc1(h), self.fc2(h)
         z = self.reparameterize(mu, logvar)
-        return z
+        return z, mu, logvar
 
     def representation(self, x):
         return self.bottleneck(self.encoder(x))[0]
 
     def forward(self, x):
         h = self.encoder(x)
-        z = self.bottleneck(h)
+        z, mu, logvar = self.bottleneck(h)
         z = self.fc3(z)
-        return self.decoder(z)
+        return self.decoder(z), mu, logvar

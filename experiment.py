@@ -88,13 +88,13 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadows = self.network(shadowless_views)
+            estimated_shadows, mu, logvar = self.network(shadowless_views)
             assert estimated_shadows.shape[1] == 2, estimated_shadows.shape
             threshold = 0.1
             true_binary = binary_shadow(shadowless_views, shadowed_views, threshold)
             pixel_loss = self.pixelwise_loss(true_binary, estimated_shadows)
             true_binary = true_binary.float()
-            kld = kl_divergence(estimated_shadows, true_binary)
+            kld = kl_divergence(mu, logvar)
             training_loss = pixel_loss + kld
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
@@ -133,7 +133,7 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
-            estimated_shadow = self.network(shadowless_view.unsqueeze(0))
+            estimated_shadow, _, _ = self.network(shadowless_view.unsqueeze(0))
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
             ShapeDataset.print_tensor(

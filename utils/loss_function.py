@@ -11,12 +11,8 @@ def binary_shadow(shadowless, true_shadowed_image, threshold):
 def shadow_loss(binary_true_shadow, binary_estimated_shadow):
     return torch.nn.CrossEntropyLoss()(binary_estimated_shadow, binary_true_shadow)
 
-def kl_divergence(binary_estimated_shadow, binary_true_shadow):
-    binary_true_shadow = torch.unsqueeze(binary_true_shadow, 1)
-    inverse_shadow = 1 - binary_true_shadow
-    combined = torch.cat((inverse_shadow, binary_true_shadow), dim=1)
-    softmax_estimate = F.softmax(binary_estimated_shadow, dim=1)
-    return torch.nn.KLDivLoss()(softmax_estimate.log(), combined)
+def kl_divergence(mu, logvar):
+    return -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
 def binary_shadow_to_image(shadowless, binary_estimated_shadow):
     binary_estimated_shadow = F.softmax(binary_estimated_shadow, dim=1)
