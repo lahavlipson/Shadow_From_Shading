@@ -95,7 +95,8 @@ class Experiment:
             pixel_loss = self.pixelwise_loss(true_binary, estimated_shadows)
             true_binary = true_binary.float()
             kld = kl_divergence(mu, logvar)
-            training_loss = pixel_loss + kld
+            alpha = 0.9
+            training_loss = alpha * pixel_loss + (1 - alpha) * kld
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
             training_loss.backward()

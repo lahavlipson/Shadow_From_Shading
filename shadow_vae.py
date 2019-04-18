@@ -32,9 +32,9 @@ class ShadowVAE(nn.Module):
             Flatten()
         )
 
-        self.fc1 = nn.Linear(128**2, 128**2)
-        self.fc2 = nn.Linear(128**2, 128**2)
-        self.fc3 = nn.Linear(128**2, 128**2)
+        self.fc1 = nn.Linear(128**2, 20)
+        self.fc2 = nn.Linear(128**2, 20)
+        self.fc3 = nn.Linear(20, 128**2)
 
         self.decoder = nn.Sequential(
             UnFlatten(),
