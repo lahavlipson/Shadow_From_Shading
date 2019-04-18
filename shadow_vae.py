@@ -17,15 +17,15 @@ class ShadowVAE(nn.Module):
             nn.Conv2d(3, 12, 5, padding=2),
             nn.BatchNorm2d(12),
             nn.ReLU(),
-            # nn.Conv2d(12, 16, 7, padding=3),
-            # nn.BatchNorm2d(16),
-            # nn.ReLU(),
-            # nn.Conv2d(16, 16, 9, padding=4),
-            # nn.BatchNorm2d(16),
-            # nn.ReLU(),
-            # nn.Conv2d(16, 12, 9, padding=4),
-            # nn.BatchNorm2d(12),
-            # nn.ReLU(),
+            nn.Conv2d(12, 16, 7, padding=3),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.Conv2d(16, 16, 9, padding=4),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.Conv2d(16, 12, 9, padding=4),
+            nn.BatchNorm2d(12),
+            nn.ReLU(),
             nn.Conv2d(12, 1, 9, padding=4),
             nn.BatchNorm2d(1),
             nn.ReLU(),
@@ -41,13 +41,13 @@ class ShadowVAE(nn.Module):
             nn.Conv2d(1, 12, 5, padding=2),
             nn.BatchNorm2d(12),
             nn.ReLU(),
-            # nn.Conv2d(12, 16, 7, padding=3),
-            # nn.BatchNorm2d(16),
-            # nn.ReLU(),
-            # nn.Conv2d(16, 16, 9, padding=4),
-            # nn.BatchNorm2d(16),
-            # nn.ReLU(),
-            # nn.Conv2d(16, 12, 9, padding=4),
+            nn.Conv2d(12, 16, 7, padding=3),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.Conv2d(16, 16, 9, padding=4),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.Conv2d(16, 12, 9, padding=4),
             nn.BatchNorm2d(12),
             nn.ReLU(),
             nn.Conv2d(12, 2, 7, padding=3)
@@ -56,7 +56,7 @@ class ShadowVAE(nn.Module):
     def reparameterize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
         # return torch.normal(mu, std)
-        esp = torch.randn(*mu.size())
+        esp = torch.randn(*mu.size()).cuda()
         z = mu + std * esp
         return z
 
