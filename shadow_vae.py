@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+import numpy as np
+import torch.nn.functional as F
 
 class Flatten(nn.Module):
     def forward(self, input):
@@ -54,11 +56,10 @@ class ShadowVAE(nn.Module):
         )
 
     def reparameterize(self, mu, logvar):
-        std = logvar.mul(0.5).exp_()
-        # return torch.normal(mu, std)
-        esp = torch.randn(*mu.size()).cuda()
-        z = mu + std * esp
-        return z
+        std = torch.exp(0.5 * logvar)
+        eps = torch.from_numpy(np.random.normal(0, 1, size=std.size())).float()
+        eps = eps.cuda()
+        return mu + std * Variable(eps, requires_grad=False)  # Reparameterization trick
 
     def bottleneck(self, h):
         mu, logvar = self.fc1(h), self.fc2(h)

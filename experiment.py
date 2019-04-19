@@ -45,6 +45,9 @@ class Experiment:
         # number of epochs since curriculum update
         self.epochs_since_increase = 10
 
+        # detect anomalies
+        torch.autograd.set_detect_anomaly(True)
+
     def run(self):
         self.evaluate(0, 15)
         for epoch in range(self.start, self.start + self.EPOCHS + 1):
