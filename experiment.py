@@ -7,7 +7,7 @@ from shadow_vae import ShadowVAE as ShadowNet
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
 from utils.loss_function import vae_loss_function, binary_shadow_to_image
-from utils.vae_loss import loss_function
+from torch.optim.lr_scheduler import StepLR
 
 class Experiment:
 
@@ -21,8 +21,11 @@ class Experiment:
         self.training_losses = []
         self.EPOCHS = args.niter
         self.cuda = args.cuda
-        #self.pixelwise_loss = shadow_loss
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=args.lr)
+        # loss rate scheduler
+        self.scheduler = StepLR(self.optimizer, step_size=15, gamma=0.5)
+
+        # self.pixelwise_loss = shadow_loss
         if self.cuda:
             self.network = self.network.cuda()
             #self.pixelwise_loss = self.pixelwise_loss.cuda()
@@ -80,7 +83,8 @@ class Experiment:
                        map_location='cpu'))
 
     def train(self, epoch):
-        print("Training Epoch",epoch)
+        self.scheduler.step()
+        print("Training Epoch",epoch,'LR:', self.scheduler.get_lr())
 
         self.network.train()
         running_loss = []
@@ -97,9 +101,7 @@ class Experiment:
             training_loss = recon_loss + KLD_loss
 
             running_loss.append(training_loss.item())
-            #print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
-            print("Recon loss:", str.format('{0:.5f}', recon_loss), " | KLD loss:", str.format('{0:.5f}', KLD_loss),
-                  "|", str(((i + 1) * 100) // len(self.dataloader)) + "%")
+            print("Avg Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"% | R:",str.format('{0:.5f}', recon_loss),"D:",str.format('{0:.5f}', KLD_loss))
             training_loss.backward()
             self.optimizer.step()
 
