@@ -26,4 +26,9 @@ def vae_loss_function(shadowless, binary_estimated_shadow, true_shadowed_image, 
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
+    if KLD.max() > 1000000:
+        print("WARNING: ASTRONOMICAL KLD VALUE")
+    if BCE.max() > 1000000:
+        print("WARNING: ASTRONOMICAL BCE VALUE")
+
     return BCE + KLD

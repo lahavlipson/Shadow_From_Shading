@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
+from torch.autograd import Variable
 
 class Flatten(nn.Module):
     def forward(self, input):
@@ -73,4 +74,4 @@ class ShadowVAE(nn.Module):
         h = self.encoder(x)
         z, mu, logvar = self.bottleneck(h)
         z = self.fc3(z)
-        return self.decoder(z), mu, logvar
+        return self.decoder(z)+0.001, mu, logvar
