@@ -57,10 +57,11 @@ class ShadowVAE(nn.Module):
         )
 
     def reparameterize(self, mu, logvar):
+        logvar = logvar.clamp(-30, 30)
         std = torch.exp(0.5 * logvar)
-        eps = torch.from_numpy(np.random.normal(0, 1, size=std.size())).float()
+        eps = torch.randn_like(std)
         eps = eps.cuda()
-        return mu + std * Variable(eps, requires_grad=False)  # Reparameterization trick
+        return mu + eps * std
 
     def bottleneck(self, h):
         mu, logvar = self.fc1(h), self.fc2(h)
@@ -74,4 +75,4 @@ class ShadowVAE(nn.Module):
         h = self.encoder(x)
         z, mu, logvar = self.bottleneck(h)
         z = self.fc3(z)
-        return self.decoder(z)+0.001, mu, logvar
+        return self.decoder(z), mu, logvar
