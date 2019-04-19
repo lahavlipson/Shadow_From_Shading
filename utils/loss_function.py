@@ -31,4 +31,4 @@ def vae_loss_function(shadowless, binary_estimated_shadow, true_shadowed_image, 
     if BCE.max() > 1000000:
         print("WARNING: ASTRONOMICAL BCE VALUE")
 
-    return BCE + KLD
+    return BCE, KLD

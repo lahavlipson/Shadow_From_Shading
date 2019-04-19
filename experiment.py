@@ -92,9 +92,18 @@ class Experiment:
 
             estimated_shadows, mu, logvar = self.network(shadowless_views)
             assert estimated_shadows.shape[1] == 2, estimated_shadows.shape
-            training_loss = vae_loss_function(shadowless_views, estimated_shadows, shadowed_views, mu, logvar)
+            recon_loss, KLD_loss = vae_loss_function(shadowless_views, estimated_shadows, shadowed_views, mu, logvar)
+
+            training_loss = None
+            if epoch >= 10:
+                training_loss = recon_loss + KLD_loss
+            else:
+                training_loss = recon_loss
+
             running_loss.append(training_loss.item())
-            print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
+            #print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
+            print("Recon loss:", str.format('{0:.5f}', recon_loss), " | KLD loss:", str.format('{0:.5f}', KLD_loss),
+                  "|", str(((i + 1) * 100) // len(self.dataloader)) + "%")
             training_loss.backward()
             self.optimizer.step()
 
