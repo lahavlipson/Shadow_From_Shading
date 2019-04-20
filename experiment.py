@@ -8,6 +8,7 @@ from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
 from utils.loss_function import shadow_loss, binary_shadow_to_image
 from utils.vae_loss import loss_function
+from torch.optim.lr_scheduler import StepLR
 
 class Experiment:
 
@@ -23,6 +24,9 @@ class Experiment:
         self.cuda = args.cuda
         self.pixelwise_loss = shadow_loss
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=args.lr)
+        # loss rate scheduler
+        self.scheduler = StepLR(self.optimizer, step_size=15, gamma=0.2)
+
         if self.cuda:
             self.network = self.network.cuda()
             #self.pixelwise_loss = self.pixelwise_loss.cuda()
@@ -77,7 +81,8 @@ class Experiment:
                        map_location='cpu'))
 
     def train(self, epoch):
-        print("Training Epoch",epoch)
+        self.scheduler.step()
+        print("Training Epoch", epoch, 'LR:', self.scheduler.get_lr())
 
         self.network.train()
         running_loss = []
