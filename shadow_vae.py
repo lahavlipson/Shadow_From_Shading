@@ -50,7 +50,7 @@ class ShadowVAE(nn.Module):
             nn.Conv2d(16, 12, 9, padding=4),
             nn.BatchNorm2d(12),
             nn.ReLU(),
-            nn.Conv2d(12, 1, 7, padding=3)
+            nn.Conv2d(12, 2, 7, padding=3)
         )
 
     def reparameterize(self, mu, logvar):
@@ -69,7 +69,7 @@ class ShadowVAE(nn.Module):
         return self.bottleneck(self.encoder(x))[0]
 
     def forward(self, x):
-        h = self.encoder(x)
-        z, mu, logvar = self.bottleneck(h)
-        z = self.fc3(z)
-        return self.decoder(z), mu, logvar
+        x = self.encoder(x)
+        x = self.fc1(x)
+        x = self.fc3(x)
+        return self.decoder(x)

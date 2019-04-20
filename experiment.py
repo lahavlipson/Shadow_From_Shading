@@ -3,7 +3,7 @@ import torch.utils.data
 import os
 import numpy as np
 from utils.helpers import define_parser, mean, diffs
-from shadow_net import ShadowNet
+from shadow_vae import ShadowVAE as ShadowNet
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
 from utils.loss_function import shadow_loss, binary_shadow_to_image
@@ -131,7 +131,7 @@ class Experiment:
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
             ShapeDataset.print_tensor(
-                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
+                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 1.0)*255.0,
                 os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
 
             #torch.save(estimated_shadowed_view, os.path.join(epoch_folder, "estimate_" + str(num) + ".pt"))
