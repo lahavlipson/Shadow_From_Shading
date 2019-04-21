@@ -41,6 +41,7 @@ class ShadowNet(nn.Module):
 
 
     def reparameterize(self, mu, logvar):
+        return mu
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         return mu + eps * std

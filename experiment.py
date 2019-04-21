@@ -6,8 +6,7 @@ from utils.helpers import define_parser, mean, diffs
 from shadow_net import ShadowNet
 from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
-from utils.loss_function import shadow_loss, binary_shadow_to_image
-from utils.vae_loss import loss_function
+from utils.loss_function import vae_loss, binary_shadow_to_image
 
 class Experiment:
 
@@ -88,10 +87,11 @@ class Experiment:
             self.optimizer.zero_grad()
 
             estimated_shadows, mu, logvar = self.network(shadowless_views)
-            BCE, KLD = shadow_loss(shadowless_views, estimated_shadows, shadowed_views, mu, logvar)
-            training_loss = BCE + KLD
+            BCE, KLD = vae_loss(shadowless_views, estimated_shadows, shadowed_views, mu, logvar)
+            KLD = KLD * np.clip( (epoch-60)/40.0, 0.0, 1.0)
+            training_loss = BCE# + KLD
             running_loss.append(training_loss.item())
-            print("Avg Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"% | R:",BCE, "D:",KLD)
+            print("Avg Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"% | R:",str.format('{0:.5f}',BCE), "D:",str.format('{0:.5f}',KLD))
             training_loss.backward()
             self.optimizer.step()
 
