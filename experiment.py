@@ -101,9 +101,10 @@ class Experiment:
             recent_growth = mean(diffs(self.training_losses[-10:]))
             print("Recent Growth:", recent_growth)
 
-            if self.epochs_since_increase >= 10 and 0 < recent_growth < 1:
+            if False and self.epochs_since_increase >= 10 and 0 < recent_growth < 1:
                 self.epochs_since_increase = 0
                 if self.dataset.focus:
+                    assert False, "done, man"
                     print("STOPPING FOCUS")
                     self.dataset.focus = False
                 else:
@@ -130,9 +131,14 @@ class Experiment:
             estimated_shadow = self.network(shadowless_view.unsqueeze(0))
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
+            true_shadow = shadowless_view - shadowed_view
+
             ShapeDataset.print_tensor(
-                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
+                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view, true_shadow], 2).clamp(0.0, 1.0)*255,
                 os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
+
+            torch.save(shadowless_view, os.path.join(epoch_folder, "shadowless_" + str(num) + ".pt"))
+            torch.save(estimated_shadow, os.path.join(epoch_folder, "estimated_shadow_" + str(num) + ".pt"))
 
             #torch.save(estimated_shadowed_view, os.path.join(epoch_folder, "estimate_" + str(num) + ".pt"))
 

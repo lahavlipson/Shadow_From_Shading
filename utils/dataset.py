@@ -26,6 +26,8 @@ class ShapeDataset(Dataset):
             sc.refocus_camera()
 
         shadows, noshadows = sc.render()
+        shadows = shadows / 255.0
+        noshadows = noshadows / 255.0
         shad_tens = torch.Tensor(shadows).permute(2, 0, 1)
         noshad_tens = torch.Tensor(noshadows).permute(2, 0, 1)
         return noshad_tens, shad_tens
