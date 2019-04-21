@@ -21,7 +21,7 @@ class Experiment:
         self.training_losses = []
         self.EPOCHS = args.niter
         self.cuda = args.cuda
-        self.pixelwise_loss = shadow_loss
+        # self.pixelwise_loss = shadow_loss
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=args.lr)
         if self.cuda:
             self.network = self.network.cuda()
@@ -87,11 +87,11 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadows = self.network(shadowless_views)
-            assert estimated_shadows.shape[1] == 2, estimated_shadows.shape
-            training_loss = self.pixelwise_loss(shadowless_views, estimated_shadows, shadowed_views)
+            estimated_shadows, mu, logvar = self.network(shadowless_views)
+            BCE, KLD = shadow_loss(shadowless_views, estimated_shadows, shadowed_views, mu, logvar)
+            training_loss = BCE + KLD
             running_loss.append(training_loss.item())
-            print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
+            print("Avg Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"% | R:",BCE, "D:",KLD)
             training_loss.backward()
             self.optimizer.step()
 
@@ -128,7 +128,7 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
-            estimated_shadow = self.network(shadowless_view.unsqueeze(0))
+            estimated_shadow, _, _ = self.network(shadowless_view.unsqueeze(0))
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
             true_shadow = shadowless_view - shadowed_view
@@ -144,6 +144,7 @@ class Experiment:
 
 
 if __name__ == '__main__':
+    torch.autograd.set_detect_anomaly(True)
     args = define_parser().parse_args()
     exp = Experiment(args)
     exp.run()
