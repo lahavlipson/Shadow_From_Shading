@@ -152,6 +152,7 @@ if __name__ == '__main__':
     g = Scene(10, True, gridlines_width=20, gridlines_spacing=30)
     g.add_object()
     g.add_object()
+    g.mutate_all_objects()
     g.ground_mesh()
     shadows, noshadows = g.render()
     # shadows = cv2.cvtColor(shadows.astype(np.uint8), cv2.COLOR_BGR2GRAY)
