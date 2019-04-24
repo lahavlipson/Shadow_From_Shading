@@ -10,12 +10,13 @@ class ShapeDataset(Dataset):
         self.length = args.ep_len
         self.focus = True
         self.number_of_shapes = 1
+        self.variability = 0
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, index):
-        sc = Scene(True, gridlines_width=20, gridlines_spacing=30)
+        sc = Scene(self.variability, True, gridlines_width=20, gridlines_spacing=30)
         for _ in range(self.number_of_shapes):
             sc.add_object()
         sc.ground_mesh()
