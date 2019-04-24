@@ -40,14 +40,13 @@ class ShadowNet(nn.Module):
         self.conv9 = nn.Conv2d(12, 2, 5, padding=2)
 
 
-    def reparameterize(self, mu, logvar):
-        return mu
+    def reparameterize(self, mu, logvar, std_scale):
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
-        return mu + eps * std
+        return mu + std_scale * eps * std
 
 
-    def forward(self, x):
+    def forward(self, x, std_scale):
         #Encode
         x = self.relu(self.bn1(self.conv1(x)))
         x = self.relu(self.bn2(self.conv2(x)))
@@ -58,7 +57,7 @@ class ShadowNet(nn.Module):
         logvar = self.fc2(x)
 
         #Sample
-        x = self.reparameterize(mu, logvar)
+        x = self.reparameterize(mu, logvar, std_scale)
 
         #Decode
         x = self.fc3(x)

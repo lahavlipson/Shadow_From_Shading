@@ -46,7 +46,7 @@ class Experiment:
 
     def run(self):
         self.evaluate(0, 15)
-        for epoch in range(self.start, self.start + self.EPOCHS + 1):
+        for epoch in range(self.start, self.EPOCHS + 1):
             self.train(epoch)
             self.save_model(epoch)
             self.evaluate(epoch, 15)
@@ -86,10 +86,11 @@ class Experiment:
                 shadowed_views = shadowed_views.cuda()
             self.optimizer.zero_grad()
 
-            estimated_shadows, mu, logvar = self.network(shadowless_views)
+            coeff = np.clip((epoch-40)/60,0.0,1.0)
+            estimated_shadows, mu, logvar = self.network(shadowless_views, coeff)
             BCE, KLD = vae_loss(shadowless_views, estimated_shadows, shadowed_views, mu, logvar)
-            KLD = KLD * np.clip( (epoch-60)/40.0, 0.0, 1.0)
-            training_loss = BCE# + KLD
+            
+            training_loss = BCE + KLD
             running_loss.append(training_loss.item())
             print("Avg Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"% | R:",str.format('{0:.5f}',BCE), "D:",str.format('{0:.5f}',KLD))
             training_loss.backward()
@@ -128,7 +129,7 @@ class Experiment:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
 
-            estimated_shadow, _, _ = self.network(shadowless_view.unsqueeze(0))
+            estimated_shadow, _, _ = self.network(shadowless_view.unsqueeze(0), 0)
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
             true_shadow = shadowless_view - shadowed_view
