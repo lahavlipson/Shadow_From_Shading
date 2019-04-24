@@ -112,8 +112,8 @@ class Scene:
         c = np.cos(np.deg2rad(second_axis))
         s = np.sin(np.deg2rad(second_axis))
         second_matrix = np.array(((1, 0,  0),
-                               (0, c, -s),
-                               (0, s,  c)))
+                                  (0, c, -s),
+                                  (0, s,  c)))
         difference_from_center = np.dot(second_matrix, difference_from_center)
         difference_from_center = np.dot(first_matrix, difference_from_center)
 
