@@ -9,7 +9,7 @@ import numpy as np
 
 class Scene:
 
-    def __init__(self, gridlines_on=None, gridlines_width=None, gridlines_spacing=None):
+    def __init__(self, light_variability=0, gridlines_on=None, gridlines_width=None, gridlines_spacing=None):
         if gridlines_on or gridlines_width or gridlines_spacing:
             assert not (gridlines_on is None\
                 or gridlines_width is None\
@@ -21,7 +21,9 @@ class Scene:
         self.shapes = []
         self.grid_shapes = []
 
-        self.center = (0, 140, 300)
+        self.center = np.array((0, 140, 300))
+
+        self.light_variability = light_variability
 
         self.background_prims = []
         background_lower_bound = -1e3
@@ -56,7 +58,8 @@ class Scene:
                                              (background_lower_bound, 0.01, background_lower_bound + gridlines_width + offset),
                                             (background_upper_bound, 0.01, background_lower_bound + gridlines_width + offset)]))
 
-        self.light = Lit((400, 300, -800), 1000000)
+        self.default_light = np.array((400, 300, -800))
+        self.default_intensity = 1000000
         self.camera = Cam((0, 140, 300), (128, 128))
 
 
@@ -94,6 +97,29 @@ class Scene:
             mutation = [self.__scale_object, self.__translate_object, self.__rotate_object][randint(0,2)]
             mutation(shape)
 
+
+    def new_light(self):
+        difference_from_center = self.default_light - self.center
+
+        first_axis = uniform(-self.light_variability, self.light_variability)
+        c = np.cos(np.deg2rad(first_axis))
+        s = np.sin(np.deg2rad(first_axis))
+        first_matrix = np.array(((c, 0, -s),
+                                 (0, 1,  0),
+                                 (s, 0,  c)))
+
+        second_axis = uniform(-self.light_variability, self.light_variability)
+        c = np.cos(np.deg2rad(second_axis))
+        s = np.sin(np.deg2rad(second_axis))
+        second_matrix = np.array(((1, 0,  0),
+                                  (0, c, -s),
+                                  (0, s,  c)))
+        difference_from_center = np.dot(second_matrix, difference_from_center)
+        difference_from_center = np.dot(first_matrix, difference_from_center)
+
+        return Lit(self.center + difference_from_center, self.default_intensity)
+
+
     def __scale_object(self, shape):
         for i in range(3):
             shape.scale(uniform(0.8, 1.2), axis=i)
@@ -115,16 +141,18 @@ class Scene:
 
     def render(self):
         surface_prims = []
+        light = self.new_light()
         for shape in self.shapes:
             surface_prims += shape.render()
         views = [self.camera.view_from(-30, 0, 200)]
         res_x, res_y = self.camera.resolution
-        return self.rend.render(views, self.light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
+        return self.rend.render(views, light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
 if __name__ == '__main__':
-    g = Scene(True, gridlines_width=20, gridlines_spacing=30)
+    g = Scene(10, True, gridlines_width=20, gridlines_spacing=30)
     g.add_object()
     g.add_object()
+    g.mutate_all_objects()
     g.ground_mesh()
     shadows, noshadows = g.render()
     # shadows = cv2.cvtColor(shadows.astype(np.uint8), cv2.COLOR_BGR2GRAY)

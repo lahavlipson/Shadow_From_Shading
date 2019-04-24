@@ -3,8 +3,9 @@ import cv2 as cv
 import os
 
 
-g = Scene(True, 3, 100)
+g = Scene(10, True, 3, 100)
 g.add_object()
+g.mutate_all_objects()
 shadows, noshadows = g.render()
 if not os.path.isdir("tmp_scenes"):
     os.mkdir("tmp_scenes")
