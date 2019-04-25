@@ -10,7 +10,7 @@ class ShapeDataset(Dataset):
         self.length = args.ep_len
         self.focus = True
         self.number_of_shapes = 1
-        self.variability = 0
+        self.variability = (20,8)
 
     def __len__(self):
         return self.length

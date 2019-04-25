@@ -5,11 +5,12 @@ from random import randint, uniform, shuffle
 import cv2
 import os
 import numpy as np
-
+import math
+from numpy.linalg import norm
 
 class Scene:
 
-    def __init__(self, light_variability=0, gridlines_on=None, gridlines_width=None, gridlines_spacing=None):
+    def __init__(self, light_variability=(20,8), gridlines_on=None, gridlines_width=None, gridlines_spacing=None):
         if gridlines_on or gridlines_width or gridlines_spacing:
             assert not (gridlines_on is None\
                 or gridlines_width is None\
@@ -98,26 +99,13 @@ class Scene:
             mutation(shape)
 
 
-    def new_light(self):
-        difference_from_center = self.default_light - self.center
-
-        first_axis = uniform(-self.light_variability, self.light_variability)
-        c = np.cos(np.deg2rad(first_axis))
-        s = np.sin(np.deg2rad(first_axis))
-        first_matrix = np.array(((c, 0, -s),
-                                 (0, 1,  0),
-                                 (s, 0,  c)))
-
-        second_axis = uniform(-self.light_variability, self.light_variability)
-        c = np.cos(np.deg2rad(second_axis))
-        s = np.sin(np.deg2rad(second_axis))
-        second_matrix = np.array(((1, 0,  0),
-                                  (0, c, -s),
-                                  (0, s,  c)))
-        difference_from_center = np.dot(second_matrix, difference_from_center)
-        difference_from_center = np.dot(first_matrix, difference_from_center)
-
-        return Lit(self.center + difference_from_center, self.default_intensity)
+    def new_light(self, theta = 60, phi=8):
+        d = norm(self.default_light - self.center)
+        x_trans = d * math.sin(math.radians(theta))
+        z_trans = d * math.cos(math.radians(theta))
+        y_trans = d * math.sin(math.radians(phi))
+        translation = np.array((x_trans, y_trans, -z_trans))
+        return Lit(self.center + translation, self.default_intensity)
 
 
     def __scale_object(self, shape):
@@ -141,7 +129,7 @@ class Scene:
 
     def render(self):
         surface_prims = []
-        light = self.new_light()
+        light = self.new_light(*self.light_variability)#Lit(self.default_light, self.default_intensity)#
         for shape in self.shapes:
             surface_prims += shape.render()
         views = [self.camera.view_from(-30, 0, 200)]
