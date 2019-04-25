@@ -3,7 +3,7 @@ import cv2 as cv
 import os
 
 
-g = Scene(10, True, 3, 100)
+g = Scene(15, 5, True, 3, 100)
 g.add_object()
 g.mutate_all_objects()
 shadows, noshadows = g.render()

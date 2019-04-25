@@ -9,7 +9,12 @@ import numpy as np
 
 class Scene:
 
-    def __init__(self, light_variability=0, gridlines_on=None, gridlines_width=None, gridlines_spacing=None):
+    def __init__(self,
+                 light_variability_x=0,
+                 light_variability_y=0,
+                 gridlines_on=None,
+                 gridlines_width=None,
+                 gridlines_spacing=None):
         if gridlines_on or gridlines_width or gridlines_spacing:
             assert not (gridlines_on is None\
                 or gridlines_width is None\
@@ -23,7 +28,8 @@ class Scene:
 
         self.center = np.array((0, 140, 300))
 
-        self.light_variability = light_variability
+        self.light_variability_x = light_variability_x
+        self.light_variability_y = light_variability_y
 
         self.background_prims = []
         background_lower_bound = -1e3
@@ -101,16 +107,16 @@ class Scene:
     def new_light(self):
         difference_from_center = self.default_light - self.center
 
-        first_axis = uniform(-self.light_variability, self.light_variability)
-        c = np.cos(np.deg2rad(first_axis))
-        s = np.sin(np.deg2rad(first_axis))
+        horizontal_change = uniform(-self.light_variability_x, self.light_variability_x)
+        c = np.cos(np.deg2rad(horizontal_change))
+        s = np.sin(np.deg2rad(horizontal_change))
         first_matrix = np.array(((c, 0, -s),
                                  (0, 1,  0),
                                  (s, 0,  c)))
 
-        second_axis = uniform(-self.light_variability, self.light_variability)
-        c = np.cos(np.deg2rad(second_axis))
-        s = np.sin(np.deg2rad(second_axis))
+        vertical_change = uniform(-self.light_variability_y, self.light_variability_y)
+        c = np.cos(np.deg2rad(vertical_change))
+        s = np.sin(np.deg2rad(vertical_change))
         second_matrix = np.array(((1, 0,  0),
                                   (0, c, -s),
                                   (0, s,  c)))
@@ -149,7 +155,7 @@ class Scene:
         return self.rend.render(views, light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
 if __name__ == '__main__':
-    g = Scene(10, True, gridlines_width=20, gridlines_spacing=30)
+    g = Scene(120, 0, True, gridlines_width=20, gridlines_spacing=30)
     g.add_object()
     g.add_object()
     g.mutate_all_objects()
