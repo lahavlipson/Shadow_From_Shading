@@ -20,7 +20,7 @@ class ShapeDataset(Dataset):
         for _ in range(self.number_of_shapes):
             sc.add_object()
         sc.ground_mesh()
-        sc.refocus_camera()
+        sc.camera.location = (0, 50, 300)
         sc.mutate_all_objects()
         sc.ground_mesh()
         if self.focus:
@@ -33,9 +33,9 @@ class ShapeDataset(Dataset):
 
         #Get type, loc
         assert len(sc.shapes) == 1
-        shape_id = torch.Tensor(sc.shapes[0].id)
+        shape_id = torch.Tensor([sc.shapes[0].id]).long()
         shape_loc = torch.Tensor(sc.shapes[0].center)
-
+        assert shape_id.shape == torch.Size([1]), shape_id.shape
         return noshad_tens, (shape_id, shape_loc)
 
     def print_numpy(arr, filename):

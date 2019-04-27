@@ -11,13 +11,14 @@ class ShapeNet(nn.Module):
 
         self.fc1 = nn.Linear(400, 200)
         self.bn1 = nn.BatchNorm1d(200)
-        # self.fc2 = nn.Linear(200, 200)
-        # self.bn2 = nn.BatchNorm1d(200)
-        # self.fc3 = nn.Linear(200, 200)
-        # self.bn3 = nn.BatchNorm1d(200)
-        # self.fc4 = nn.Linear(200, 200)
-        # self.bn4 = nn.BatchNorm1d(200)
-        # self.fc5 = nn.Linear(200, 200)
+        self.fc2 = nn.Linear(200, 200)
+        self.bn2 = nn.BatchNorm1d(200)
+        self.fc3 = nn.Linear(200, 200)
+        self.bn3 = nn.BatchNorm1d(200)
+        self.fc4 = nn.Linear(200, 200)
+        self.bn4 = nn.BatchNorm1d(200)
+        self.fc5 = nn.Linear(200, 200)
+        self.bn5 = nn.BatchNorm1d(200)
         self.fc_type = nn.Linear(200, 4)
         self.fc_loc = nn.Linear(200, 3)
 
@@ -25,10 +26,10 @@ class ShapeNet(nn.Module):
 
     def forward(self, x):
         x = self.relu(self.bn1(self.fc1(x)))
-        # x = self.relu(self.bn2(self.fc2(x)))
-        # x = self.relu(self.bn3(self.fc3(x)))
-        # x = self.relu(self.bn4(self.fc4(x)))
-        # x = self.relu(self.bn5(self.fc5(x)))
-        type = self.relu(self.bn6(self.fc_type(x)))
-        loc = self.relu(self.bn7(self.fc_loc(x)))
-        return type, loc
+        x = self.relu(self.bn2(self.fc2(x)))
+        x = self.relu(self.bn3(self.fc3(x)))
+        x = self.relu(self.bn4(self.fc4(x)))
+        x = self.relu(self.bn5(self.fc5(x)))
+        shape_type = self.relu(self.fc_type(x))
+        shape_loc = self.relu(self.fc_loc(x))
+        return shape_type, shape_loc

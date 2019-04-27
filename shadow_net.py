@@ -55,6 +55,7 @@ class ShadowNet(nn.Module):
         x = self.relu(self.bn7(self.conv7(x)))
         x = self.relu(self.bn8(self.conv8(x)))
         x = self.conv9(x)
+        return x
 
     def forward(self, x):
         x = self.encode(x)

@@ -21,6 +21,8 @@ class ExperimentShape:
         self.network = ShapeNet()
         self.shadownet = ShadowNet()
         self.shadownet.load_state_dict(torch.load(filepath, map_location='cpu'))
+        for param in self.shadownet.parameters():
+                param.requires_grad = False
 
         self.training_losses = []
         self.EPOCHS = args.niter
@@ -28,7 +30,7 @@ class ExperimentShape:
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=args.lr)
         if self.cuda:
             self.network = self.network.cuda()
-            #self.pixelwise_loss = self.pixelwise_loss.cuda()
+            self.shadownet = self.shadownet.cuda()
 
         # create result_dir
         self.results_dir = args.res_dir
@@ -93,7 +95,8 @@ class ExperimentShape:
 
             encoding = self.shadownet.encode(shadowless_views)
             est_type, est_loc = self.network(encoding)
-            training_loss = nn.L2Loss()(est_loc, true_loc) + nn.CrossEntropyLoss()(est_type, true_type)
+            true_type = true_type.squeeze(1)
+            training_loss = 1000*nn.CrossEntropyLoss()(est_type, true_type) + nn.MSELoss()(est_loc, true_loc)
             running_loss.append(training_loss.item())
             print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
             training_loss.backward()
@@ -120,29 +123,38 @@ class ExperimentShape:
 
 
     def evaluate(self, epoch, num_samples):
+        self.network.eval()
         print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to", self.results_dir)
         epoch_folder = os.path.join(self.results_dir,"epoch_"+str(epoch))
         if not os.path.isdir(epoch_folder):
             os.mkdir(epoch_folder)
 
         for num in range(num_samples):
-            shadowless_view, _ = self.dataset[0]
+            shadowless_view, (true_type, true_loc) = self.dataset[0]
+
+            if self.cuda:
+                shadowless_view = shadowless_view.cuda()
 
             encoding = self.shadownet.encode(shadowless_view.unsqueeze(0))
             est_type, est_loc = self.network(encoding)
             sc = Scene((20,8), True, gridlines_width=20, gridlines_spacing=30)
-            sc.add_object(est_type.item())
-            sc.shapes[0].center = est_loc.item()
-            sc.refocus_camera()
+            est_type = np.argmax(est_type.detach().cpu().numpy())
+            est_loc = est_loc.detach().cpu().numpy()[0]
+            sc.add_object(est_type)
+            sc.ground_mesh()
+            sc.camera.location = (0, 50, 300)
+            sc.shapes[0].center = est_loc
             _, estimated_scene = sc.render()
 
             ShapeDataset.print_tensor(
-                torch.cat([shadowless_view, estimated_scene], 2),
+                torch.cat([shadowless_view.detach().cpu(), torch.Tensor(estimated_scene).permute(2,0,1)], 2),
                 os.path.join(epoch_folder, "input_estmated_" + str(num) + ".png"))
+            text_file = open(os.path.join(epoch_folder, "input_estmated_" + str(num) + ".txt"), "w")
+            text_file.write("Input type: " + str(true_type) + " est type: " + str(est_type))
 
 
 if __name__ == '__main__':
-    filepath = ""
+    filepath = "trained_shadownet.pth"
     args = define_parser().parse_args()
     exp = ExperimentShape(args, filepath)
     exp.run()
