@@ -101,7 +101,7 @@ class Experiment:
             recent_growth = mean(diffs(self.training_losses[-10:]))
             print("Recent Growth:", recent_growth)
 
-            if self.epochs_since_increase >= 10 and 0 < recent_growth < 1:
+            if False and self.epochs_since_increase >= 10 and 0 < recent_growth < 1:
                 self.epochs_since_increase = 0
                 if self.dataset.focus:
                     print("STOPPING FOCUS")

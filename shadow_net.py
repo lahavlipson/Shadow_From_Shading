@@ -18,10 +18,13 @@ class ShadowNet(nn.Module):
         self.conv3 = nn.Conv2d(16, 24, 9, padding=4)
         self.bn3 = nn.BatchNorm2d(24)
 
-        self.conv4 = nn.Conv2d(24, 24, 9, padding=4)
-        self.bn4 = nn.BatchNorm2d(24)
+        self.conv4 = nn.Conv2d(24, 6, 9, padding=4)
+        self.bn4 = nn.BatchNorm2d(6)
 
-        self.conv5 = nn.Conv2d(24, 24, 9, padding=4)
+        self.fc1 = nn.Linear(6*128**2, 400)
+        self.fc2 = nn.Linear(400, 6*128**2)
+
+        self.conv5 = nn.Conv2d(6, 24, 9, padding=4)
         self.bn5 = nn.BatchNorm2d(24)
 
         self.conv6 = nn.Conv2d(24, 24, 9, padding=4)
@@ -35,16 +38,25 @@ class ShadowNet(nn.Module):
 
         self.conv9 = nn.Conv2d(12, 2, 5, padding=2)
 
-
-    def forward(self, x):
-
+    def encode(self, x):
         x = self.relu(self.bn1(self.conv1(x)))
         x = self.relu(self.bn2(self.conv2(x)))
         x = self.relu(self.bn3(self.conv3(x)))
         x = self.relu(self.bn4(self.conv4(x)))
+        x = x.view(-1, 6 * 128 * 128)
+        x = self.fc1(x)
+        return x
+
+    def decode(self, x):
+        x = self.fc2(x)
+        x = x.view(-1, 6, 128, 128)
         x = self.relu(self.bn5(self.conv5(x)))
         x = self.relu(self.bn6(self.conv6(x)))
         x = self.relu(self.bn7(self.conv7(x)))
         x = self.relu(self.bn8(self.conv8(x)))
         x = self.conv9(x)
+
+    def forward(self, x):
+        x = self.encode(x)
+        x = self.decode(x)
         return x

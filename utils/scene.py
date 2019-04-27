@@ -69,6 +69,7 @@ class Scene:
 
     def add_object(self):
         shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 0.5, 50, 0.2)][randint(0,3)]
+        shape.scale(35)
         self.shapes.append(shape)
 
     def mutate_object(self, shape):
@@ -78,7 +79,6 @@ class Scene:
 
     def mutate_all_objects(self):
         for shape in self.shapes:
-            shape.scale(35)
             self.__scale_object(shape)
             self.__rotate_object(shape)
             self.__translate_object(shape)

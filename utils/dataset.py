@@ -8,7 +8,7 @@ class ShapeDataset(Dataset):
 
     def __init__(self, args):
         self.length = args.ep_len
-        self.focus = True
+        self.focus = False
         self.number_of_shapes = 1
         self.variability = (20,8)
 
