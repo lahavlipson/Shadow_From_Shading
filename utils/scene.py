@@ -67,8 +67,8 @@ class Scene:
     def calc_center(self):
         return mean([shape.center for shape in self.shapes])
 
-    def add_object(self):
-        shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 0.5, 50, 0.2)][randint(0,3)]
+    def add_object(self, i=randint(0,3)):
+        shape = [Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 0.5, 50, 0.2), Sphere(self.center, 0.5)][i]
         shape.scale(35)
         self.shapes.append(shape)
 
@@ -79,8 +79,8 @@ class Scene:
 
     def mutate_all_objects(self):
         for shape in self.shapes:
-            self.__scale_object(shape)
-            self.__rotate_object(shape)
+            # self.__scale_object(shape)
+            # self.__rotate_object(shape)
             self.__translate_object(shape)
 
     def crossover(self, scene):

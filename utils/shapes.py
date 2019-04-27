@@ -66,6 +66,7 @@ class Sphere(Shape):
     def __init__(self, center, radius):
         super().__init__(center)
         self.radius = radius
+        self.id = 3
 
     def rotate(self, pitch, yaw, roll):
         pass
@@ -90,6 +91,7 @@ class Torus(Shape):
         self.radius = radius
         self.wall_radius = wall_radius
         self.num_spheres = num_spheres
+        self.id = 2
 
     def scale(self, factor, axis=None):
         if axis == 0 or axis is None:
@@ -147,6 +149,7 @@ class Cuboid(Shape):
                                ((-0.5, -0.5, -0.5), ( 0.5, -0.5, -0.5), ( 0.5, -0.5,  0.5)),
                                ((-0.5, -0.5, -0.5), ( 0.5, -0.5,  0.5), (-0.5, -0.5,  0.5))]
         self.triangle_faces = np.array(self.triangle_faces)
+        self.id = 1
 
     def __str__(self):
         return "Cuboid"
@@ -166,6 +169,7 @@ class Tetrahedron(Shape):
                                (points[0], points[3], points[1]),
                                (points[3], points[2], points[1])]
         self.triangle_faces = np.array(self.triangle_faces)
+        self.id = 0
 
     #Needs to be tested further
     def expand(self):

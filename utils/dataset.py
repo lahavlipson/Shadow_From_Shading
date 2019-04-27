@@ -27,9 +27,16 @@ class ShapeDataset(Dataset):
             sc.refocus_camera()
 
         shadows, noshadows = sc.render()
-        shad_tens = torch.Tensor(shadows).permute(2, 0, 1)
+        #shad_tens = torch.Tensor(shadows).permute(2, 0, 1)
         noshad_tens = torch.Tensor(noshadows).permute(2, 0, 1)
-        return noshad_tens, shad_tens
+        #return noshad_tens, shad_tens
+
+        #Get type, loc
+        assert len(sc.shapes) == 1
+        shape_id = torch.Tensor(sc.shapes[0].id)
+        shape_loc = torch.Tensor(sc.shapes[0].center)
+
+        return noshad_tens, (shape_id, shape_loc)
 
     def print_numpy(arr, filename):
         cv2.imwrite(filename, arr)
