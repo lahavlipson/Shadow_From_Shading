@@ -180,6 +180,31 @@ class HollowCuboid(Shape):
     def __str__(self):
         return "HollowCuboid"
 
+
+class Cylinder(Shape):
+    def __init__(self, center, num_cuboids):
+        super().__init__(center)
+        self.triangle_faces = []
+        angle_offset = 2 * pi / num_cuboids
+
+        for i in range(num_cuboids):
+            theta = i * angle_offset
+            arc_chord_width = 2 * np.sin(angle_offset/2)
+            arc_chord_length = 2 * np.cos(angle_offset/2)
+            new_cuboid = Cuboid((0,
+                                 0,
+                                 0))
+            new_cuboid.scale(arc_chord_width, 0)
+            new_cuboid.scale(arc_chord_length, 1)
+            new_cuboid.rotate(np.degrees(theta), 0, 0)
+            self.triangle_faces.extend(new_cuboid.get_transformed_triangles())
+
+        self.triangle_faces = np.array(self.triangle_faces)
+
+    def __str__(self):
+        return "Cylinder"
+
+
 class Tetrahedron(Shape):
     def __init__(self, center):
         super().__init__(center)
