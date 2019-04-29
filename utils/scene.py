@@ -1,4 +1,4 @@
-from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus, HollowCuboid, Cylinder
+from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus, HollowCuboid, Cylinder, Pyramid
 from utils.renderer import Renderer, Tri, Lit, Cam
 from utils.helpers import mean
 from random import randint, uniform, shuffle
@@ -73,7 +73,9 @@ class Scene:
                  Cuboid(self.center),
                  Torus(self.center, 0.5, 50, 0.2),
                  HollowCuboid(self.center, 0.2),
-                 Cylinder(self.center, 50)][randint(0, 5)]
+                 Cylinder(self.center, 50),
+                 Pyramid(self.center)][randint(0, 6)]
+        shape.scale(35)
         self.shapes.append(shape)
 
     def mutate_object(self, shape):
@@ -83,7 +85,6 @@ class Scene:
 
     def mutate_all_objects(self):
         for shape in self.shapes:
-            shape.scale(35)
             self.__scale_object(shape)
             self.__rotate_object(shape)
             self.__translate_object(shape)

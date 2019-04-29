@@ -3,7 +3,7 @@ import cv2 as cv
 import os
 
 
-sc = Scene((20,80), True, gridlines_width=20, gridlines_spacing=30)
+sc = Scene((20,8), True, gridlines_width=20, gridlines_spacing=30)
 for _ in range(1):
     sc.add_object()
 sc.ground_mesh()

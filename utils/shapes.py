@@ -130,6 +130,20 @@ class Torus(Shape):
         return [Cir((x, self.wall_radius)) for x in sphere_centers]
 
 
+class Pyramid(Shape):
+    def __init__(self, center):
+        super().__init__(center)
+        self.triangle_faces = [((-0.5, -0.5, -0.5), (-0.5, -0.5, 0.5), (0.5, -0.5, -0.5)),
+                               ((0.5, -0.5, 0.5), (0.5, -0.5, -0.5), (-0.5, -0.5, 0.5)),
+                               ((0.5, -0.5, 0.5), (-0.5, -0.5, 0.5), (-0, 0.5, -0)),
+                               ((-0.5, -0.5, -0.5), (-0.5, -0.5, 0.5), (-0, 0.5, -0)),
+                               ((0.5, -0.5, 0.5), (0.5, -0.5, -0.5), (-0, 0.5, -0)),
+                               ((0.5, -0.5, -0.5), ( -0.5,  -0.5, -0.5), (-0,  0.5, -0))]
+        self.triangle_faces = np.array(self.triangle_faces)
+
+    def __str__(self):
+        return "Pyramid"
+
 class Cuboid(Shape):
     def __init__(self, center):
         super().__init__(center)
