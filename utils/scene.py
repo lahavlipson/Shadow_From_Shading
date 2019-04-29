@@ -68,7 +68,11 @@ class Scene:
         return mean([shape.center for shape in self.shapes])
 
     def add_object(self):
-        shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 0.5, 50, 0.2)][randint(0,3)]
+        shape = [Sphere(self.center, 0.5),
+                 Tetrahedron(self.center),
+                 Cuboid(self.center),
+                 Torus(self.center, 0.5, 50, 0.2),
+                 HollowCuboid(self.center, 0.2)][randint(0,4)]
         self.shapes.append(shape)
 
     def mutate_object(self, shape):
