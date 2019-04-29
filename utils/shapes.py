@@ -9,6 +9,7 @@ class Shape:
     def __init__(self, center):
         self.center = np.array(center)
         self.rotation_matrix = np.identity(3)
+        self.scale_matrix = np.identity(3)
 
     def translate(self, offset):
         self.center = self.center + offset
@@ -132,7 +133,6 @@ class Torus(Shape):
 class Cuboid(Shape):
     def __init__(self, center):
         super().__init__(center)
-        self.scale_matrix = np.identity(3)
         self.triangle_faces = [(( 0.5,  0.5,  0.5), (-0.5,  0.5, -0.5), (-0.5,  0.5,  0.5)),
                                (( 0.5,  0.5,  0.5), (-0.5,  0.5,  0.5), (-0.5, -0.5,  0.5)),
                                (( 0.5,  0.5,  0.5), ( 0.5, -0.5,  0.5), ( 0.5, -0.5, -0.5)),
@@ -154,8 +154,6 @@ class Cuboid(Shape):
 class HollowCuboid(Shape):
     def __init__(self, center, strut_width):
         super().__init__(center)
-
-        self.scale_matrix = np.identity(3)
         width = 0.5 - strut_width/2
 
         axis_offsets = list(product([-1, 1], [-1, 1]))
@@ -185,7 +183,6 @@ class HollowCuboid(Shape):
 class Tetrahedron(Shape):
     def __init__(self, center):
         super().__init__(center)
-        self.scale_matrix = np.identity(3)
         # Points taken from here: https://en.wikipedia.org/wiki/Tetrahedron
         points = [( 1,  0, -1/sqrt(2)),
                   (-1,  0, -1/sqrt(2)),
