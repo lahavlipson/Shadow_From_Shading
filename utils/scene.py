@@ -1,4 +1,4 @@
-from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus, HollowCuboid, Cylinder, Pyramid
+from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus, HollowCuboid, Cylinder, Pyramid, Cone
 from utils.renderer import Renderer, Tri, Lit, Cam
 from utils.helpers import mean
 from random import randint, uniform, shuffle
@@ -74,7 +74,8 @@ class Scene:
                  Torus(self.center, 0.5, 50, 0.2),
                  HollowCuboid(self.center, 0.2),
                  Cylinder(self.center, 50),
-                 Pyramid(self.center)][randint(0, 6)]
+                 Pyramid(self.center),
+                 Cone(self.center, 50)][randint(0, 7)]
         shape.scale(35)
         self.shapes.append(shape)
 

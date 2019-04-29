@@ -133,9 +133,9 @@ class Torus(Shape):
 class Pyramid(Shape):
     def __init__(self, center):
         super().__init__(center)
-        self.triangle_faces = [((-0.5, -0.5, -0.5), (-0.5, -0.5, 0.5), (0.5, -0.5, -0.5)),
-                               ((0.5, -0.5, 0.5), (0.5, -0.5, -0.5), (-0.5, -0.5, 0.5)),
-                               ((0.5, -0.5, 0.5), (-0.5, -0.5, 0.5), (-0, 0.5, -0)),
+        self.triangle_faces = [((-0.5, -0.5, 0.5), (-0.5, -0.5, -0.5), (0.5, -0.5, -0.5)),
+                               ((0.5, -0.5, -0.5), (0.5, -0.5, 0.5), (-0.5, -0.5, 0.5)),
+                               ((-0.5, -0.5, 0.5), (0.5, -0.5, 0.5), (-0, 0.5, -0)),
                                ((-0.5, -0.5, -0.5), (-0.5, -0.5, 0.5), (-0, 0.5, -0)),
                                ((0.5, -0.5, 0.5), (0.5, -0.5, -0.5), (-0, 0.5, -0)),
                                ((0.5, -0.5, -0.5), ( -0.5,  -0.5, -0.5), (-0,  0.5, -0))]
@@ -199,7 +199,7 @@ class Cylinder(Shape):
     def __init__(self, center, num_cuboids):
         super().__init__(center)
         self.triangle_faces = []
-        angle_offset = 2 * pi / num_cuboids
+        angle_offset = pi / num_cuboids
 
         for i in range(num_cuboids):
             theta = i * angle_offset
@@ -217,6 +217,31 @@ class Cylinder(Shape):
 
     def __str__(self):
         return "Cylinder"
+
+
+class Cone(Shape):
+    def __init__(self, center, num_pyramids):
+        super().__init__(center)
+        self.triangle_faces = []
+        angle_offset = pi / num_pyramids
+
+        for i in range(num_pyramids):
+            theta = i * angle_offset
+            arc_chord_width = 2 * np.sin(angle_offset/2)
+            arc_chord_length = 2 * np.cos(angle_offset/2)
+            new_pyramid = Pyramid((0,
+                                   0,
+                                   0))
+            new_pyramid.scale(arc_chord_width, 2)
+            new_pyramid.scale(arc_chord_length, 0)
+            new_pyramid.rotate(0, 0, np.degrees(theta))
+            self.triangle_faces.extend(new_pyramid.get_transformed_triangles())
+
+        self.triangle_faces = np.array(self.triangle_faces)
+
+    def __str__(self):
+        return "Cone"
+
 
 
 class Tetrahedron(Shape):
