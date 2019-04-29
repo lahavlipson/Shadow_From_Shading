@@ -199,7 +199,7 @@ class Cylinder(Shape):
     def __init__(self, center, num_cuboids):
         super().__init__(center)
         self.triangle_faces = []
-        angle_offset = 2 * pi / num_cuboids
+        angle_offset = pi / num_cuboids
 
         for i in range(num_cuboids):
             theta = i * angle_offset
@@ -223,7 +223,7 @@ class Cone(Shape):
     def __init__(self, center, num_pyramids):
         super().__init__(center)
         self.triangle_faces = []
-        angle_offset = 2 * pi / num_pyramids
+        angle_offset = pi / num_pyramids
 
         for i in range(num_pyramids):
             theta = i * angle_offset
