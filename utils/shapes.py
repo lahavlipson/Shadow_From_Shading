@@ -2,6 +2,7 @@ from utils.renderer import Cir, Tri
 import numpy as np
 from random import randint, uniform, shuffle
 from math import sqrt, pi
+from itertools import product
 
 
 class Shape:
@@ -42,7 +43,7 @@ class Shape:
         assert axis >= 0 and axis < 3
         self.scale_matrix[axis] = self.scale_matrix[axis] * factor
 
-    def lowest_y(self):
+    def get_transformed_triangles(self):
         dimensions = self.triangle_faces.shape
         modified = self.triangle_faces.reshape(dimensions[0] * dimensions[1], 3)
         modified = np.dot(modified, self.scale_matrix)
@@ -50,16 +51,14 @@ class Shape:
         modified = modified.reshape(dimensions[0], dimensions[1], 3)
         offset = np.tile(self.center, (dimensions[0], dimensions[1], 1))
         modified += offset
+        return modified
+
+    def lowest_y(self):
+        modified = self.get_transformed_triangles()
         return np.min(modified[:, :, 1])
 
     def render(self):
-        dimensions = self.triangle_faces.shape
-        modified = self.triangle_faces.reshape(dimensions[0] * dimensions[1], 3)
-        modified = np.dot(modified, self.scale_matrix)
-        modified = np.dot(modified, self.rotation_matrix)
-        modified = modified.reshape(dimensions[0], dimensions[1], 3)
-        offset = np.tile(self.center, (dimensions[0], dimensions[1], 1))
-        modified += offset
+        modified = self.get_transformed_triangles()
         return [Tri(tuple(face)) for face in modified]
 
 class Sphere(Shape):
@@ -150,6 +149,38 @@ class Cuboid(Shape):
 
     def __str__(self):
         return "Cuboid"
+
+
+class HollowCuboid(Shape):
+    def __init__(self, center, strut_width):
+        super().__init__(center)
+
+        self.scale_matrix = np.identity(3)
+        width = 0.5 - strut_width/2
+
+        axis_offsets = list(product([-1, 1], [-1, 1]))
+
+        self.triangle_faces = []
+
+        for axis in range(3):
+            for axis_offset in axis_offsets:
+                current_offset = np.array(axis_offset)
+                current_offset = np.insert(current_offset, axis, 0)
+                current_offset = current_offset * width
+
+                new_cuboid = Cuboid(current_offset)
+
+                scales = np.ones((3,))
+                scales[np.arange(len(scales))!=axis] = strut_width
+                for dim, scale in enumerate(scales):
+                    new_cuboid.scale(scale, dim)
+
+                self.triangle_faces.extend(new_cuboid.get_transformed_triangles())
+
+        self.triangle_faces = np.array(self.triangle_faces)
+
+    def __str__(self):
+        return "HollowCuboid"
 
 class Tetrahedron(Shape):
     def __init__(self, center):

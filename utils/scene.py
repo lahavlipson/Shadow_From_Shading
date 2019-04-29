@@ -1,4 +1,4 @@
-from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus
+from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus, HollowCuboid
 from utils.renderer import Renderer, Tri, Lit, Cam
 from utils.helpers import mean
 from random import randint, uniform, shuffle
@@ -137,7 +137,7 @@ class Scene:
         return self.rend.render(views, light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
 if __name__ == '__main__':
-    g = Scene(10, True, gridlines_width=20, gridlines_spacing=30)
+    g = Scene(gridlines_on=True, gridlines_width=20, gridlines_spacing=30)
     g.add_object()
     g.add_object()
     g.mutate_all_objects()
