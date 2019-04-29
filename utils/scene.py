@@ -1,4 +1,4 @@
-from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus
+from utils.shapes import Sphere, Cuboid, Tetrahedron, Torus, HollowCuboid, Cylinder
 from utils.renderer import Renderer, Tri, Lit, Cam
 from utils.helpers import mean
 from random import randint, uniform, shuffle
@@ -68,7 +68,12 @@ class Scene:
         return mean([shape.center for shape in self.shapes])
 
     def add_object(self):
-        shape = [Sphere(self.center, 0.5), Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 0.5, 50, 0.2)][randint(0,3)]
+        shape = [Sphere(self.center, 0.5),
+                 Tetrahedron(self.center),
+                 Cuboid(self.center),
+                 Torus(self.center, 0.5, 50, 0.2),
+                 HollowCuboid(self.center, 0.2),
+                 Cylinder(self.center, 50)][randint(0, 5)]
         self.shapes.append(shape)
 
     def mutate_object(self, shape):
@@ -137,7 +142,7 @@ class Scene:
         return self.rend.render(views, light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 
 if __name__ == '__main__':
-    g = Scene(10, True, gridlines_width=20, gridlines_spacing=30)
+    g = Scene(gridlines_on=True, gridlines_width=20, gridlines_spacing=30)
     g.add_object()
     g.add_object()
     g.mutate_all_objects()
