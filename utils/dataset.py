@@ -35,8 +35,10 @@ class ShapeDataset(Dataset):
         assert len(sc.shapes) == 1
         shape_id = torch.Tensor([sc.shapes[0].id]).long()
         shape_loc = torch.Tensor(sc.shapes[0].center)
+        shape_scale = torch.Tensor([sc.shapes[0].scale_factor])
+        shape_rot = torch.Tensor(sc.shapes[0].rotation)
         assert shape_id.shape == torch.Size([1]), shape_id.shape
-        return noshad_tens, (shape_id, shape_loc)
+        return noshad_tens, (shape_id, shape_loc, shape_scale, shape_rot)
 
     def print_numpy(arr, filename):
         cv2.imwrite(filename, arr)

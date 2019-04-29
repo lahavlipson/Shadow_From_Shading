@@ -69,9 +69,10 @@ class Scene:
 
     def add_object(self, i=-1):
         if i<0:
-            i=randint(0,3)
+            i=randint(1,1)
         shape = [Tetrahedron(self.center), Cuboid(self.center), Torus(self.center, 0.5, 50, 0.2), Sphere(self.center, 0.5)][i]
         shape.scale(35)
+        shape.scale_factor = 35
         self.shapes.append(shape)
 
     def mutate_object(self, shape):
@@ -81,8 +82,8 @@ class Scene:
 
     def mutate_all_objects(self):
         for shape in self.shapes:
-            # self.__scale_object(shape)
-            # self.__rotate_object(shape)
+            self.__scale_object(shape)
+            self.__rotate_object(shape)
             self.__translate_object(shape)
 
     def crossover(self, scene):
@@ -111,8 +112,11 @@ class Scene:
 
 
     def __scale_object(self, shape):
-        for i in range(3):
-            shape.scale(uniform(0.8, 1.2), axis=i)
+        scaling = uniform(0.8, 1.2)
+        shape.scale(scaling)
+        shape.scale_factor *= scaling
+        #for i in range(3):
+        #    shape.scale(uniform(0.8, 1.2), axis=i)
 
     def __translate_object(self, shape):
         shape.translate((randint(-50, 50), 0, randint(-50, 50)))
@@ -124,7 +128,11 @@ class Scene:
 
 
     def __rotate_object(self, shape):
-        shape.rotate(randint(0, 359), randint(0, 359), randint(0, 359))
+        if shape.id == 0 or shape.id == 1:
+            shape.rotation = (randint(-25, 25), randint(-25, 25), randint(-25, 25))
+        else: 
+            shape.rotation = (0,0,0)
+        shape.rotate(*(shape.rotation))
 
     def refocus_camera(self):
         self.camera.location = self.calc_center()

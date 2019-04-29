@@ -9,6 +9,7 @@ from utils.dataset import ShapeDataset
 from matplotlib import pyplot as plt
 from utils.scene import Scene
 from torch import nn
+from torch.optim.lr_scheduler import StepLR
 
 class ExperimentShape:
 
@@ -28,6 +29,9 @@ class ExperimentShape:
         self.EPOCHS = args.niter
         self.cuda = args.cuda
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=args.lr)
+        # loss rate scheduler
+        self.scheduler = StepLR(self.optimizer, step_size=22, gamma=0.1)
+
         if self.cuda:
             self.network = self.network.cuda()
             self.shadownet = self.shadownet.cuda()
@@ -82,23 +86,33 @@ class ExperimentShape:
                        map_location='cpu'))
 
     def train(self, epoch):
-        print("Training Epoch",epoch)
+        self.scheduler.step()
+        print("Training Epoch", epoch, 'LR:', self.scheduler.get_lr())
 
         self.network.train()
         running_loss = []
-        for i, (shadowless_views, (true_type, true_loc)) in enumerate(self.dataloader):
+        for i, (shadowless_views, (true_type, true_loc, true_scale, true_rot)) in enumerate(self.dataloader):
             if self.cuda:
                 shadowless_views = shadowless_views.cuda()
                 true_type = true_type.cuda()
                 true_loc = true_loc.cuda()
+                true_scale = true_scale.cuda()
+                true_rot = true_rot.cuda()
             self.optimizer.zero_grad()
 
             encoding = self.shadownet.encode(shadowless_views)
-            est_type, est_loc = self.network(encoding)
+            est_type, est_loc, est_scale, est_rot = self.network(encoding)
             true_type = true_type.squeeze(1)
-            training_loss = 1000*nn.CrossEntropyLoss()(est_type, true_type) + nn.MSELoss()(est_loc, true_loc)
+            true_scale = true_scale.squeeze(1)
+
+            type_loss = 1000*nn.CrossEntropyLoss()(est_type, true_type)
+            loc_loss = nn.MSELoss()(est_loc, true_loc)
+            scale_loss = nn.MSELoss()(est_scale, true_scale)
+            rot_loss = 10*nn.L1Loss()(est_rot, true_rot)
+            training_loss = type_loss + loc_loss + rot_loss + scale_loss
+
             running_loss.append(training_loss.item())
-            print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"%")
+            print("Training loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader))+"% Type Loss:",str.format('{0:.5f}',type_loss), "Loc loss:",str.format('{0:.5f}',loc_loss),"rot_loss:",str.format('{0:.5f}',rot_loss), "scale_loss:",str.format('{0:.5f}',scale_loss))
             training_loss.backward()
             self.optimizer.step()
 
@@ -130,27 +144,32 @@ class ExperimentShape:
             os.mkdir(epoch_folder)
 
         for num in range(num_samples):
-            shadowless_view, (true_type, true_loc) = self.dataset[0]
+            shadowless_view, (true_type, true_loc, true_scale, true_rot) = self.dataset[0]
 
             if self.cuda:
                 shadowless_view = shadowless_view.cuda()
 
             encoding = self.shadownet.encode(shadowless_view.unsqueeze(0))
-            est_type, est_loc = self.network(encoding)
+            est_type, est_loc, est_scale, est_rot = self.network(encoding)
             sc = Scene((20,8), True, gridlines_width=20, gridlines_spacing=30)
             est_type = np.argmax(est_type.detach().cpu().numpy())
             est_loc = est_loc.detach().cpu().numpy()[0]
+            est_rot = est_rot.detach().cpu().numpy()[0]
+            est_scale = est_scale.item()#.detach().item.cpu().numpy()
+
             sc.add_object(est_type)
             sc.ground_mesh()
             sc.camera.location = (0, 50, 300)
+            #sc.shapes[0].scale(est_scale)
+            sc.shapes[0].rotate(*est_rot)
             sc.shapes[0].center = est_loc
             _, estimated_scene = sc.render()
 
             ShapeDataset.print_tensor(
                 torch.cat([shadowless_view.detach().cpu(), torch.Tensor(estimated_scene).permute(2,0,1)], 2),
-                os.path.join(epoch_folder, "input_estmated_" + str(num) + ".png"))
+                os.path.join(epoch_folder, "input_estimated_" + str(num) + ".png"))
             text_file = open(os.path.join(epoch_folder, "input_estmated_" + str(num) + ".txt"), "w")
-            text_file.write("Input type: " + str(true_type) + " est type: " + str(est_type))
+            text_file.write("Input rot: " + str(true_rot) + " est rot: " + str(est_rot))
 
 
 if __name__ == '__main__':

@@ -21,6 +21,8 @@ class ShapeNet(nn.Module):
         self.bn5 = nn.BatchNorm1d(200)
         self.fc_type = nn.Linear(200, 4)
         self.fc_loc = nn.Linear(200, 3)
+        self.fc_scale = nn.Linear(200, 1)
+        self.fc_rot = nn.Linear(200, 3)
 
 
 
@@ -30,6 +32,8 @@ class ShapeNet(nn.Module):
         x = self.relu(self.bn3(self.fc3(x)))
         x = self.relu(self.bn4(self.fc4(x)))
         x = self.relu(self.bn5(self.fc5(x)))
-        shape_type = self.relu(self.fc_type(x))
-        shape_loc = self.relu(self.fc_loc(x))
-        return shape_type, shape_loc
+        shape_type = self.fc_type(x)
+        shape_loc = self.fc_loc(x)
+        shape_scale = self.fc_scale(x)
+        shape_rot = self.fc_rot(x)
+        return shape_type, shape_loc, shape_scale, shape_rot
