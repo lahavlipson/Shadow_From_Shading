@@ -101,7 +101,7 @@ class Experiment:
             recent_growth = mean(diffs(self.training_losses[-10:]))
             print("Recent Growth:", recent_growth)
 
-            if self.epochs_since_increase >= 10 and 0 < recent_growth < 1:
+            if self.epochs_since_increase > 10 and 0 < recent_growth < 0.001:
                 self.epochs_since_increase = 0
                 if self.dataset.focus:
                     print("STOPPING FOCUS")
@@ -112,6 +112,7 @@ class Experiment:
                 else:
                     print("INCREASING NUM SHAPES TO", 1 + self.dataset.number_of_shapes)
                     self.dataset.number_of_shapes += 1
+                    assert self.dataset.number_of_shapes < 14
             else:
                 self.epochs_since_increase += 1
 
