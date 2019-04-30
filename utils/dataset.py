@@ -7,20 +7,27 @@ from random import randint
 
 class ShapeDataset(Dataset):
 
-    def __init__(self, args):
+    def __init__(self, args, testing):
         self.length = args.ep_len
         self.focus = True
         self.number_of_shapes = 1
         self.variability = (20,8)
-        self.testing = False
+        self.testing = testing
+        # self.shape_id = -1
 
     def __len__(self):
+        if self.testing:
+            return 160
         return self.length
 
     def __getitem__(self, index):
         sc = Scene(self.variability, True, gridlines_width=20, gridlines_spacing=30)
-        for _ in range(self.number_of_shapes):
-            sc.add_object()
+        if self.testing:
+            for _ in range(self.number_of_shapes):
+                sc.add_object(index//20)
+        else:
+            for _ in range(self.number_of_shapes):
+                sc.add_object()
         sc.ground_mesh()
         sc.refocus_camera()
         sc.mutate_all_objects()

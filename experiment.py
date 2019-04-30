@@ -13,10 +13,16 @@ class Experiment:
 
 
     def __init__(self, args):
-        self.dataset = ShapeDataset(args)
+        self.dataset = ShapeDataset(args, False)
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
                                                         batch_size=args.batch_size, shuffle=True,
                                                         num_workers=args.workers)
+
+        self.dataset_test = ShapeDataset(args, True)
+        self.dataloader_test = torch.utils.data.DataLoader(self.dataset_test, shuffle=False,batch_size=20, num_workers=8)
+
+        self.eval_losses = [[], [], [], [], [], [], [], []]
+
         self.network = ShadowNet()
         self.training_losses = []
         self.EPOCHS = args.niter
@@ -43,7 +49,7 @@ class Experiment:
             self.training_losses = list(np.loadtxt(os.path.join(self.results_dir, 'total_training_loss.txt')))
 
         # number of epochs since curriculum update
-        self.epochs_since_increase = 10
+        self.epochs_since_increase = 0
 
     def run(self):
         self.evaluate(0, 15)
@@ -52,6 +58,7 @@ class Experiment:
             self.save_model(epoch)
             self.evaluate(epoch, 15)
             np.savetxt(os.path.join(self.results_dir, 'total_training_loss.txt'), np.array(self.training_losses))
+            np.savetxt(os.path.join(self.results_dir, 'eval_loss.txt'), np.array(self.eval_losses))
             self.save_graph()
 
     def save_graph(self):
@@ -63,6 +70,16 @@ class Experiment:
         plt.plot(list(range(1, 1 + len(self.training_losses))), self.training_losses, label='Training Loss')
         plt.legend()
         plt.savefig(os.path.join(self.results_dir, 'loss_graph.png'))
+
+        plt.clf()
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.title("Evaluation Loss")
+        plt.grid()
+        for id in range(8):
+            plt.plot(list(range(1, 1 + len(self.eval_losses[id]))), self.eval_losses[id], label=('Eval Loss: ' + str(id)))
+        plt.legend()
+        plt.savefig(os.path.join(self.results_dir, 'eval_loss_graph.png'))
 
     def save_model(self, epoch):
         new_file = '{}/netG_epoch_{}.pth'.format(self.model_dir, epoch)
@@ -116,26 +133,30 @@ class Experiment:
 
 
     def evaluate(self, epoch, num_samples):
+        self.network.eval()
         print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to", self.results_dir)
         epoch_folder = os.path.join(self.results_dir,"epoch_"+str(epoch))
         if not os.path.isdir(epoch_folder):
             os.mkdir(epoch_folder)
 
-        for num in range(num_samples):
-            shadowless_view, shadowed_view = self.dataset[0]
+        for i, (shadowless_views, shadowed_views) in enumerate(self.dataloader_test):
             if self.cuda:
-                shadowless_view = shadowless_view.cuda()
-                shadowed_view = shadowed_view.cuda()
+                shadowless_views = shadowless_views.cuda()
+                shadowed_views = shadowed_views.cuda()
 
-            estimated_shadow = self.network(shadowless_view.unsqueeze(0))
-            estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
+            estimated_shadows = self.network(shadowless_views)
+            loss = self.pixelwise_loss(shadowless_views, estimated_shadows, shadowed_views)
+            self.eval_losses[i].append(loss)
+            estimated_shadowed_view = binary_shadow_to_image(shadowless_views[0].unsqueeze(0), estimated_shadows[0].unsqueeze(0)).squeeze(0)
 
             ShapeDataset.print_tensor(
-                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
-                os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
+                torch.cat([shadowless_views[0], estimated_shadowed_view, shadowed_views[0]], 2).clamp(0.0, 255.0),
+                os.path.join(epoch_folder, "input_output_truth_" + str(i) + ".png"))
 
-            torch.save(shadowless_view, os.path.join(epoch_folder, "shadowless_" + str(num) + ".pt"))
-            torch.save(estimated_shadow, os.path.join(epoch_folder, "estimated_shadow_" + str(num) + ".pt"))
+            # ShapeDataset.print_tensor(shadowed_views[19], os.path.join(epoch_folder, "input_output_truth_" + str(i) + "_2.png"))
+
+            torch.save(shadowless_views[0], os.path.join(epoch_folder, "shadowless_" + str(i) + ".pt"))
+            torch.save(estimated_shadows[0], os.path.join(epoch_folder, "estimated_shadow_" + str(i) + ".pt"))
 
 
 if __name__ == '__main__':
