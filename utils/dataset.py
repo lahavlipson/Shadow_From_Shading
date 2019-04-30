@@ -3,6 +3,7 @@ from utils.scene import Scene
 from torch.utils.data import Dataset
 import cv2
 import numpy as np
+from random import randint
 
 class ShapeDataset(Dataset):
 
@@ -11,6 +12,7 @@ class ShapeDataset(Dataset):
         self.focus = True
         self.number_of_shapes = 1
         self.variability = (20,8)
+        self.testing = False
 
     def __len__(self):
         return self.length

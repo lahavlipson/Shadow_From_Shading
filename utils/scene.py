@@ -67,15 +67,17 @@ class Scene:
     def calc_center(self):
         return mean([shape.center for shape in self.shapes])
 
-    def add_object(self):
+    def add_object(self, i=-1):
+        if i<0:
+            i = randint(0, 7)
         shape = [Sphere(self.center, 0.5),
                  Tetrahedron(self.center),
                  Cuboid(self.center),
-                 Torus(self.center, 0.5, 50, 0.2),
-                 HollowCuboid(self.center, 0.2),
                  Cylinder(self.center, 50),
                  Pyramid(self.center),
-                 Cone(self.center, 50)][randint(0, 7)]
+                 Cone(self.center, 50),
+                 Torus(self.center, 0.5, 50, 0.15),
+                 HollowCuboid(self.center, 0.15)][i]
         shape.scale(35)
         self.shapes.append(shape)
 

@@ -90,6 +90,7 @@ class Torus(Shape):
         self.radius = radius
         self.wall_radius = wall_radius
         self.num_spheres = num_spheres
+        self.scale(1.2)
 
     def scale(self, factor, axis=None):
         if axis == 0 or axis is None:
@@ -190,6 +191,7 @@ class HollowCuboid(Shape):
                 self.triangle_faces.extend(new_cuboid.get_transformed_triangles())
 
         self.triangle_faces = np.array(self.triangle_faces)
+        self.scale(1.25)
 
     def __str__(self):
         return "HollowCuboid"
@@ -203,8 +205,8 @@ class Cylinder(Shape):
 
         for i in range(num_cuboids):
             theta = i * angle_offset
-            arc_chord_width = 2 * np.sin(angle_offset/2)
-            arc_chord_length = 2 * np.cos(angle_offset/2)
+            arc_chord_width = 1 * np.sin(angle_offset/2)
+            arc_chord_length = 1 * np.cos(angle_offset/2)
             new_cuboid = Cuboid((0,
                                  0,
                                  0))
@@ -238,6 +240,9 @@ class Cone(Shape):
             self.triangle_faces.extend(new_pyramid.get_transformed_triangles())
 
         self.triangle_faces = np.array(self.triangle_faces)
+        self.scale(0.5, 0)
+        self.scale(0.5, 2)
+        self.scale(1.5, 1)
 
     def __str__(self):
         return "Cone"
@@ -258,6 +263,7 @@ class Tetrahedron(Shape):
                                (points[0], points[3], points[1]),
                                (points[3], points[2], points[1])]
         self.triangle_faces = np.array(self.triangle_faces)
+        self.scale(0.75)
 
     #Needs to be tested further
     def expand(self):
