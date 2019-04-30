@@ -13,6 +13,7 @@ class ShapeDataset(Dataset):
         self.number_of_shapes = 1
         self.variability = (20,8)
         self.testing = False
+        self.shapeset = (0,5)
 
     def __len__(self):
         return self.length
@@ -20,7 +21,7 @@ class ShapeDataset(Dataset):
     def __getitem__(self, index):
         sc = Scene(self.variability, True, gridlines_width=20, gridlines_spacing=30)
         for _ in range(self.number_of_shapes):
-            sc.add_object()
+            sc.add_object(randint(*self.shapeset))
         sc.ground_mesh()
         sc.refocus_camera()
         sc.mutate_all_objects()

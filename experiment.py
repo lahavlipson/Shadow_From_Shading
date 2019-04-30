@@ -106,6 +106,9 @@ class Experiment:
                 if self.dataset.focus:
                     print("STOPPING FOCUS")
                     self.dataset.focus = False
+                elif self.dataset.shapeset == (0,5):
+                    print("ADDING HOLLOW SHAPES")
+                    self.dataset.shapeset = (0,7)
                 else:
                     print("INCREASING NUM SHAPES TO", 1 + self.dataset.number_of_shapes)
                     self.dataset.number_of_shapes += 1
