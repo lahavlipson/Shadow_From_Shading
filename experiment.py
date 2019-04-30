@@ -134,7 +134,8 @@ class Experiment:
                 torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
                 os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
 
-            #torch.save(estimated_shadowed_view, os.path.join(epoch_folder, "estimate_" + str(num) + ".pt"))
+            torch.save(shadowless_view, os.path.join(epoch_folder, "shadowless_" + str(num) + ".pt"))
+            torch.save(estimated_shadow, os.path.join(epoch_folder, "estimated_shadow_" + str(num) + ".pt"))
 
 
 if __name__ == '__main__':
