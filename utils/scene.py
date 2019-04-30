@@ -29,7 +29,7 @@ class Scene:
         self.background_prims = []
         background_lower_bound = -1e3
         background_upper_bound = 1e3
-        wall_bound = 1e3
+        wall_bound = 2e3
         self.background_prims.append(
             Tri([(-wall_bound, 0, wall_bound),
                 (wall_bound, 0, wall_bound),
@@ -141,7 +141,8 @@ class Scene:
         light = self.new_light(*self.light_variability)#Lit(self.default_light, self.default_intensity)#
         for shape in self.shapes:
             surface_prims += shape.render()
-        views = [self.camera.view_from(-30, 0, 200)]
+        variance, dist = 30, 230
+        views = [self.camera.view_from(-30, -variance, dist), self.camera.view_from(-30, variance, dist)]
         res_x, res_y = self.camera.resolution
         return self.rend.render(views, light, surface_prims, self.background_prims, res_x, res_y, self.grid_shapes, grid_color=(0.7,0.7,0.7))
 

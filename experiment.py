@@ -43,7 +43,7 @@ class Experiment:
             self.training_losses = list(np.loadtxt(os.path.join(self.results_dir, 'total_training_loss.txt')))
 
         # number of epochs since curriculum update
-        self.epochs_since_increase = 10
+        self.epochs_since_increase = 0
 
     def run(self):
         self.evaluate(0, 15)
@@ -131,7 +131,7 @@ class Experiment:
             estimated_shadowed_view = binary_shadow_to_image(shadowless_view.unsqueeze(0), estimated_shadow).squeeze(0)
 
             ShapeDataset.print_tensor(
-                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 2).clamp(0.0, 255.0),
+                torch.cat([shadowless_view, estimated_shadowed_view, shadowed_view], 1).clamp(0.0, 255.0),
                 os.path.join(epoch_folder, "input_output_truth_" + str(num) + ".png"))
 
             torch.save(shadowless_view, os.path.join(epoch_folder, "shadowless_" + str(num) + ".pt"))
