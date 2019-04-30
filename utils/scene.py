@@ -74,9 +74,9 @@ class Scene:
                  Tetrahedron(self.center),
                  Cuboid(self.center),
                  Cylinder(self.center, 50),
+                 Torus(self.center, 0.5, 50, 0.15),
                  Pyramid(self.center),
                  Cone(self.center, 50),
-                 Torus(self.center, 0.5, 50, 0.15),
                  HollowCuboid(self.center, 0.15)][i]
         shape.scale(35)
         self.shapes.append(shape)

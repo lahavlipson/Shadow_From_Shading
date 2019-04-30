@@ -13,12 +13,19 @@ class Experiment:
 
 
     def __init__(self, args):
-        self.dataset = ShapeDataset(args)
+        self.dataset = ShapeDataset(args, False)
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
                                                         batch_size=args.batch_size, shuffle=True,
                                                         num_workers=args.workers)
+
+        self.dataset_test = ShapeDataset(args, True)
+        self.dataloader_test = torch.utils.data.DataLoader(self.dataset_test,
+                                                      batch_size=args.batch_size, shuffle=True,
+                                                      num_workers=args.workers)
+
         self.network = ShadowNet()
         self.training_losses = []
+        self.testing_losses = []
         self.EPOCHS = args.niter
         self.cuda = args.cuda
         self.pixelwise_loss = shadow_loss
@@ -41,6 +48,7 @@ class Experiment:
             self.load_model(args.net_from_epoch)
             self.start = args.net_from_epoch
             self.training_losses = list(np.loadtxt(os.path.join(self.results_dir, 'total_training_loss.txt')))
+            self.testing_losses = list(np.loadtxt(os.path.join(self.results_dir, 'total_testing_loss.txt')))
 
         # number of epochs since curriculum update
         self.epochs_since_increase = 10
@@ -50,8 +58,10 @@ class Experiment:
         for epoch in range(self.start, self.start + self.EPOCHS + 1):
             self.train(epoch)
             self.save_model(epoch)
+            self.test(epoch)
             self.evaluate(epoch, 15)
             np.savetxt(os.path.join(self.results_dir, 'total_training_loss.txt'), np.array(self.training_losses))
+            np.savetxt(os.path.join(self.results_dir, 'total_testing_loss.txt'), np.array(self.testing_losses))
             self.save_graph()
 
     def save_graph(self):
@@ -61,6 +71,7 @@ class Experiment:
         plt.title("Training Loss")
         plt.grid()
         plt.plot(list(range(1, 1 + len(self.training_losses))), self.training_losses, label='Training Loss')
+        plt.plot(list(range(1, 1 + len(self.testing_losses))), self.testing_losses, label='Testing Loss')
         plt.legend()
         plt.savefig(os.path.join(self.results_dir, 'loss_graph.png'))
 
@@ -113,16 +124,38 @@ class Experiment:
                 self.epochs_since_increase += 1
 
 
+    def test(self, epoch):
+        print("Testing Epoch",epoch)
+
+        self.network.eval()
+        running_loss = []
+        for i, (shadowless_views, shadowed_views) in enumerate(self.dataloader_test):
+            if self.cuda:
+                shadowless_views = shadowless_views.cuda()
+                shadowed_views = shadowed_views.cuda()
+
+            estimated_shadows = self.network(shadowless_views)
+            assert estimated_shadows.shape[1] == 2, estimated_shadows.shape
+            testing_loss = self.pixelwise_loss(shadowless_views, estimated_shadows, shadowed_views)
+            running_loss.append(testing_loss.item())
+            print("Testing loss:",str.format('{0:.5f}',mean(running_loss)),"|",str(((i+1)*100)//len(self.dataloader_test))+"%")
+
+        self.testing_losses.append(mean(running_loss))
+
+        self.dataset_test.focus = self.dataset.focus
+        self.dataset_test.number_of_shapes = self.dataset.number_of_shapes
+
 
 
     def evaluate(self, epoch, num_samples):
         print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to", self.results_dir)
+
         epoch_folder = os.path.join(self.results_dir,"epoch_"+str(epoch))
         if not os.path.isdir(epoch_folder):
             os.mkdir(epoch_folder)
 
         for num in range(num_samples):
-            shadowless_view, shadowed_view = self.dataset[0]
+            shadowless_view, shadowed_view = self.dataset_test[0]
             if self.cuda:
                 shadowless_view = shadowless_view.cuda()
                 shadowed_view = shadowed_view.cuda()
