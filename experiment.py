@@ -51,7 +51,7 @@ class Experiment:
             self.testing_losses = list(np.loadtxt(os.path.join(self.results_dir, 'total_testing_loss.txt')))
 
         # number of epochs since curriculum update
-        self.epochs_since_increase = 10
+        self.epochs_since_increase = 0
 
     def run(self):
         self.evaluate(0, 15)

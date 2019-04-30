@@ -15,7 +15,10 @@ class ShapeDataset(Dataset):
         self.testing = testing
 
     def __len__(self):
-        return self.length
+        if self.testing:
+            return self.length//2
+        else:
+            return self.length
 
     def __getitem__(self, index):
         sc = Scene(self.variability, True, gridlines_width=20, gridlines_spacing=30)
