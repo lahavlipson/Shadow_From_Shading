@@ -22,11 +22,12 @@ class ShapeDataset(Dataset):
 
     def __getitem__(self, index):
         sc = Scene(self.variability, True, gridlines_width=20, gridlines_spacing=30)
+        num_shapes = randint(1,self.number_of_shapes)
         if self.testing:
-            for _ in range(self.number_of_shapes):
+            for _ in range(num_shapes):
                 sc.add_object(index//20)
         else:
-            for _ in range(self.number_of_shapes):
+            for _ in range(num_shapes):
                 sc.add_object()
         sc.ground_mesh()
         sc.refocus_camera()

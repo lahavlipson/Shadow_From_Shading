@@ -134,6 +134,8 @@ class Experiment:
 
     def evaluate(self, epoch, num_samples):
         self.network.eval()
+        self.dataset_test.focus = self.dataset.focus
+        self.dataset_test.number_of_shapes = self.dataset.number_of_shapes
         print("Evaluation Epoch", str(epoch) + ". Writing", num_samples, "example outputs to", self.results_dir)
         epoch_folder = os.path.join(self.results_dir,"epoch_"+str(epoch))
         if not os.path.isdir(epoch_folder):
@@ -146,7 +148,7 @@ class Experiment:
 
             estimated_shadows = self.network(shadowless_views)
             loss = self.pixelwise_loss(shadowless_views, estimated_shadows, shadowed_views)
-            self.eval_losses[i].append(loss)
+            self.eval_losses[i].append(loss.item())
             estimated_shadowed_view = binary_shadow_to_image(shadowless_views[0].unsqueeze(0), estimated_shadows[0].unsqueeze(0)).squeeze(0)
 
             ShapeDataset.print_tensor(
@@ -155,8 +157,10 @@ class Experiment:
 
             # ShapeDataset.print_tensor(shadowed_views[19], os.path.join(epoch_folder, "input_output_truth_" + str(i) + "_2.png"))
 
-            torch.save(shadowless_views[0], os.path.join(epoch_folder, "shadowless_" + str(i) + ".pt"))
-            torch.save(estimated_shadows[0], os.path.join(epoch_folder, "estimated_shadow_" + str(i) + ".pt"))
+            shadowless_view = torch.Tensor(shadowless_views[0].detach().cpu().numpy())
+            estimated_shadow = torch.Tensor(estimated_shadows[0].detach().cpu().numpy())
+            torch.save(shadowless_view, os.path.join(epoch_folder, "shadowless_" + str(i) + ".pt"))
+            torch.save(estimated_shadow, os.path.join(epoch_folder, "estimated_shadow_" + str(i) + ".pt"))
 
 
 if __name__ == '__main__':
